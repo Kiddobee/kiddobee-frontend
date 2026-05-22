@@ -9,12 +9,60 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ReservationsRouteImport } from './routes/reservations'
+import { Route as RequestsRouteImport } from './routes/requests'
+import { Route as PipelineRouteImport } from './routes/pipeline'
 import { Route as ParentsRouteImport } from './routes/parents'
+import { Route as MatchingRouteImport } from './routes/matching'
+import { Route as InterviewsRouteImport } from './routes/interviews'
+import { Route as ContractsRouteImport } from './routes/contracts'
+import { Route as BabysittersRouteImport } from './routes/babysitters'
+import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as IndexRouteImport } from './routes/index'
 
+const ReservationsRoute = ReservationsRouteImport.update({
+  id: '/reservations',
+  path: '/reservations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RequestsRoute = RequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PipelineRoute = PipelineRouteImport.update({
+  id: '/pipeline',
+  path: '/pipeline',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ParentsRoute = ParentsRouteImport.update({
   id: '/parents',
   path: '/parents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MatchingRoute = MatchingRouteImport.update({
+  id: '/matching',
+  path: '/matching',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InterviewsRoute = InterviewsRouteImport.update({
+  id: '/interviews',
+  path: '/interviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContractsRoute = ContractsRouteImport.update({
+  id: '/contracts',
+  path: '/contracts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BabysittersRoute = BabysittersRouteImport.update({
+  id: '/babysitters',
+  path: '/babysitters',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlertsRoute = AlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -25,37 +73,156 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRoute
+  '/babysitters': typeof BabysittersRoute
+  '/contracts': typeof ContractsRoute
+  '/interviews': typeof InterviewsRoute
+  '/matching': typeof MatchingRoute
   '/parents': typeof ParentsRoute
+  '/pipeline': typeof PipelineRoute
+  '/requests': typeof RequestsRoute
+  '/reservations': typeof ReservationsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRoute
+  '/babysitters': typeof BabysittersRoute
+  '/contracts': typeof ContractsRoute
+  '/interviews': typeof InterviewsRoute
+  '/matching': typeof MatchingRoute
   '/parents': typeof ParentsRoute
+  '/pipeline': typeof PipelineRoute
+  '/requests': typeof RequestsRoute
+  '/reservations': typeof ReservationsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/alerts': typeof AlertsRoute
+  '/babysitters': typeof BabysittersRoute
+  '/contracts': typeof ContractsRoute
+  '/interviews': typeof InterviewsRoute
+  '/matching': typeof MatchingRoute
   '/parents': typeof ParentsRoute
+  '/pipeline': typeof PipelineRoute
+  '/requests': typeof RequestsRoute
+  '/reservations': typeof ReservationsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/parents'
+  fullPaths:
+    | '/'
+    | '/alerts'
+    | '/babysitters'
+    | '/contracts'
+    | '/interviews'
+    | '/matching'
+    | '/parents'
+    | '/pipeline'
+    | '/requests'
+    | '/reservations'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/parents'
-  id: '__root__' | '/' | '/parents'
+  to:
+    | '/'
+    | '/alerts'
+    | '/babysitters'
+    | '/contracts'
+    | '/interviews'
+    | '/matching'
+    | '/parents'
+    | '/pipeline'
+    | '/requests'
+    | '/reservations'
+  id:
+    | '__root__'
+    | '/'
+    | '/alerts'
+    | '/babysitters'
+    | '/contracts'
+    | '/interviews'
+    | '/matching'
+    | '/parents'
+    | '/pipeline'
+    | '/requests'
+    | '/reservations'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AlertsRoute: typeof AlertsRoute
+  BabysittersRoute: typeof BabysittersRoute
+  ContractsRoute: typeof ContractsRoute
+  InterviewsRoute: typeof InterviewsRoute
+  MatchingRoute: typeof MatchingRoute
   ParentsRoute: typeof ParentsRoute
+  PipelineRoute: typeof PipelineRoute
+  RequestsRoute: typeof RequestsRoute
+  ReservationsRoute: typeof ReservationsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/reservations': {
+      id: '/reservations'
+      path: '/reservations'
+      fullPath: '/reservations'
+      preLoaderRoute: typeof ReservationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/requests': {
+      id: '/requests'
+      path: '/requests'
+      fullPath: '/requests'
+      preLoaderRoute: typeof RequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pipeline': {
+      id: '/pipeline'
+      path: '/pipeline'
+      fullPath: '/pipeline'
+      preLoaderRoute: typeof PipelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/parents': {
       id: '/parents'
       path: '/parents'
       fullPath: '/parents'
       preLoaderRoute: typeof ParentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/matching': {
+      id: '/matching'
+      path: '/matching'
+      fullPath: '/matching'
+      preLoaderRoute: typeof MatchingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/interviews': {
+      id: '/interviews'
+      path: '/interviews'
+      fullPath: '/interviews'
+      preLoaderRoute: typeof InterviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contracts': {
+      id: '/contracts'
+      path: '/contracts'
+      fullPath: '/contracts'
+      preLoaderRoute: typeof ContractsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/babysitters': {
+      id: '/babysitters'
+      path: '/babysitters'
+      fullPath: '/babysitters'
+      preLoaderRoute: typeof BabysittersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/alerts': {
+      id: '/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AlertsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -70,8 +237,26 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AlertsRoute: AlertsRoute,
+  BabysittersRoute: BabysittersRoute,
+  ContractsRoute: ContractsRoute,
+  InterviewsRoute: InterviewsRoute,
+  MatchingRoute: MatchingRoute,
   ParentsRoute: ParentsRoute,
+  PipelineRoute: PipelineRoute,
+  RequestsRoute: RequestsRoute,
+  ReservationsRoute: ReservationsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
