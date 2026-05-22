@@ -18,7 +18,7 @@ function BabysittersPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["babysitters", "table"],
     queryFn: async () => {
-      const { data } = await supabase.from("Babysitter").select("*").order("createdAt", { ascending: false });
+      const { data } = await supabase.from("Babysitter").select("*").order("Date Joined", { ascending: false, nullsFirst: false });
       return data ?? [];
     },
   });
@@ -43,7 +43,7 @@ function BabysittersPage() {
                   <TableCell className="font-medium">{fullName(b)}</TableCell>
                   <TableCell><Badge variant="secondary">{pick<string>(b, "stage") ?? "—"}</Badge></TableCell>
                   <TableCell>{pick<string>(b, "city", "ville") ?? "—"}</TableCell>
-                  <TableCell>{fmtDate(pick(b, "createdAt", "created_at"), locale)}</TableCell>
+                  <TableCell>{fmtDate(pick(b, "Date Joined", "createdAt", "created_at"), locale)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

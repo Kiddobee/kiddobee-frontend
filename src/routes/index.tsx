@@ -13,30 +13,30 @@ export const Route = createFileRoute("/")({
 
 async function fetchDashboard() {
   const [babysitters, parents, requests, reservations, interviews, alerts] = await Promise.all([
-    supabase.from("Babysitter").select("id,stage", { count: "exact" }),
-    supabase.from("Parent").select("id", { count: "exact", head: true }),
-    supabase.from("Request").select("id,status", { count: "exact" }),
-    supabase.from("Reservation").select("id,startDate,start", { count: "exact" }),
-    supabase.from("Interview").select("id,status", { count: "exact" }),
-    supabase.from("Alert").select("*").order("createdAt", { ascending: false }).limit(5),
+    supabase.from("Babysitter").select('"Profile Status"', { count: "exact" }),
+    supabase.from("Parent").select("*", { count: "exact", head: true }),
+    supabase.from("Request").select("*", { count: "exact" }),
+    supabase.from("Reservation").select("*", { count: "exact" }),
+    supabase.from("Interview").select("*", { count: "exact" }),
+    supabase.from("Alert").select("*").limit(5),
   ]);
   const bs = babysitters.data ?? [];
   const approved = bs.filter((b: any) => {
-    const s = String(b.stage ?? "").toLowerCase();
-    return s.includes("approved") || s.includes("approuv");
+    const s = String(b["Profile Status"] ?? "").toLowerCase();
+    return s === "verified" || s.includes("approved") || s.includes("approuv");
   }).length;
   const reqs = requests.data ?? [];
   const openReqs = reqs.filter((r: any) => {
-    const s = String(r.status ?? "").toLowerCase();
+    const s = String(r.status ?? r.Status ?? "").toLowerCase();
     return s.includes("open") || s.includes("ouvert") || s.includes("pending");
   }).length;
   const now = Date.now();
   const upcoming = (reservations.data ?? []).filter((r: any) => {
-    const d = new Date(r.startDate ?? r.start ?? 0).getTime();
+    const d = new Date(r.startDate ?? r.start ?? r["Start Date"] ?? 0).getTime();
     return d >= now;
   }).length;
   const pending = (interviews.data ?? []).filter((i: any) => {
-    const s = String(i.status ?? "").toLowerCase();
+    const s = String(i.status ?? i.Status ?? "").toLowerCase();
     return s.includes("pending") || s.includes("scheduled") || s.includes("planif");
   }).length;
   return {

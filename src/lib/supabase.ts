@@ -21,8 +21,8 @@ export function fullName(row: Record<string, unknown> | null | undefined): strin
   if (!row) return "—";
   const direct = pick<string>(row, "name", "fullName", "full_name", "displayName");
   if (direct) return direct;
-  const first = pick<string>(row, "firstName", "first_name", "given_name");
-  const last = pick<string>(row, "lastName", "last_name", "family_name", "surname");
+  const first = pick<string>(row, "First Name", "firstName", "first_name", "given_name");
+  const last = pick<string>(row, "Last Name", "lastName", "last_name", "family_name", "surname");
   const joined = [first, last].filter(Boolean).join(" ").trim();
   return joined || (pick<string>(row, "email") ?? "—");
 }

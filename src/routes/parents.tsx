@@ -17,7 +17,7 @@ function ParentsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["parents"],
     queryFn: async () => {
-      const { data } = await supabase.from("Parent").select("*").order("createdAt", { ascending: false });
+      const { data } = await supabase.from("Parent").select("*").order("Date Joined", { ascending: false, nullsFirst: false });
       return data ?? [];
     },
   });
@@ -42,7 +42,7 @@ function ParentsPage() {
                   <TableCell className="font-medium">{fullName(p)}</TableCell>
                   <TableCell>{pick<string>(p, "email") ?? "—"}</TableCell>
                   <TableCell>{pick<string>(p, "city", "ville") ?? "—"}</TableCell>
-                  <TableCell>{fmtDate(pick(p, "createdAt", "created_at"), locale)}</TableCell>
+                  <TableCell>{fmtDate(pick(p, "Date Joined", "createdAt", "created_at"), locale)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
