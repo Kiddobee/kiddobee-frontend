@@ -89,14 +89,14 @@
   --chart-3: oklch(0.6 0.15 160);
   --chart-4: oklch(0.65 0.2 30);
   --chart-5: oklch(0.55 0.18 280);
-  /* Dark sidebar */
-  --sidebar: oklch(0.22 0.03 240);
-  --sidebar-foreground: oklch(0.95 0.01 240);
+  /* Light grey sidebar (SaaS admin look) */
+  --sidebar: oklch(0.975 0.005 240);
+  --sidebar-foreground: oklch(0.25 0.02 240);
   --sidebar-primary: oklch(0.72 0.13 220);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.3 0.03 240);
-  --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-border: oklch(0.3 0.03 240);
+  --sidebar-accent: oklch(0.93 0.01 240);
+  --sidebar-accent-foreground: oklch(0.2 0.02 240);
+  --sidebar-border: oklch(0.91 0.01 240);
   --sidebar-ring: oklch(0.72 0.13 220);
 }
 
