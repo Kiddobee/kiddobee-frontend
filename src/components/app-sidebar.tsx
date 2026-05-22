@@ -10,6 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
 
 const items = [
@@ -21,6 +22,7 @@ const items = [
 
 export function AppSidebar() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
+  const { setOpenMobile, isMobile } = useSidebar();
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="px-4 py-5">
@@ -42,7 +44,7 @@ export function AppSidebar() {
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild isActive={currentPath === item.url}>
-                    <Link to={item.url}>
+                    <Link to={item.url} onClick={() => isMobile && setOpenMobile(false)}>
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
