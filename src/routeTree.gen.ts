@@ -9,24 +9,12 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SittersRouteImport } from './routes/sitters'
 import { Route as ParentsRouteImport } from './routes/parents'
-import { Route as MatchesRouteImport } from './routes/matches'
 import { Route as IndexRouteImport } from './routes/index'
 
-const SittersRoute = SittersRouteImport.update({
-  id: '/sitters',
-  path: '/sitters',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ParentsRoute = ParentsRouteImport.update({
   id: '/parents',
   path: '/parents',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MatchesRoute = MatchesRouteImport.update({
-  id: '/matches',
-  path: '/matches',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -37,59 +25,37 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/matches': typeof MatchesRoute
   '/parents': typeof ParentsRoute
-  '/sitters': typeof SittersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/matches': typeof MatchesRoute
   '/parents': typeof ParentsRoute
-  '/sitters': typeof SittersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/matches': typeof MatchesRoute
   '/parents': typeof ParentsRoute
-  '/sitters': typeof SittersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/matches' | '/parents' | '/sitters'
+  fullPaths: '/' | '/parents'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/matches' | '/parents' | '/sitters'
-  id: '__root__' | '/' | '/matches' | '/parents' | '/sitters'
+  to: '/' | '/parents'
+  id: '__root__' | '/' | '/parents'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  MatchesRoute: typeof MatchesRoute
   ParentsRoute: typeof ParentsRoute
-  SittersRoute: typeof SittersRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sitters': {
-      id: '/sitters'
-      path: '/sitters'
-      fullPath: '/sitters'
-      preLoaderRoute: typeof SittersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/parents': {
       id: '/parents'
       path: '/parents'
       fullPath: '/parents'
       preLoaderRoute: typeof ParentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/matches': {
-      id: '/matches'
-      path: '/matches'
-      fullPath: '/matches'
-      preLoaderRoute: typeof MatchesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -104,9 +70,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  MatchesRoute: MatchesRoute,
   ParentsRoute: ParentsRoute,
-  SittersRoute: SittersRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
