@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, Plus, X, Upload, Check, ChevronLeft, ChevronRight, LogOut, LayoutGrid, User } from "lucide-react";
 import { toast } from "sonner";
 import { signOut } from "@/lib/auth";
-import { LanguageToggle } from "@/lib/i18n";
+import { LanguageToggle, useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/babysitter/profile-setup")({
   head: () => ({ meta: [{ title: "Profile Setup — Kiddobee" }] }),
@@ -27,7 +27,8 @@ const MISSIONS = [
   "Overnight care", "Newborn care", "Multiple children", "Special needs care",
 ];
 
-const DAYS = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+const DAYS_EN = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const DAYS_FR = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
 const LANG_LEVELS = ["Native", "Fluent", "C2", "C1", "B2", "B1", "A2", "Conversational"];
 
@@ -65,6 +66,8 @@ function fromInputDate(v: string): string {
 
 function BabysitterProfileSetup() {
   const navigate = useNavigate();
+  const { language } = useI18n();
+  const DAYS = language === "en" ? DAYS_EN : DAYS_FR;
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
@@ -559,14 +562,14 @@ function BabysitterProfileSetup() {
               </div>
               <div className="space-y-2">
                 <Label>Available days</Label>
-                {DAYS.map(d => (
-                  <label key={d} className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg border border-gray-100 hover:border-[#00B4D8]/30">
+                {DAYS_EN.map((key, idx) => (
+                  <label key={key} className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg border border-gray-100 hover:border-[#00B4D8]/30">
                     <Checkbox
-                      checked={availDays.includes(d)}
-                      onCheckedChange={() => setAvailDays(toggleArr(availDays, d))}
+                      checked={availDays.includes(key)}
+                      onCheckedChange={() => setAvailDays(toggleArr(availDays, key))}
                       className="data-[state=checked]:bg-[#00B4D8] data-[state=checked]:border-[#00B4D8]"
                     />
-                    <span className="text-sm font-medium">{d}</span>
+                    <span className="text-sm font-medium">{DAYS[idx]}</span>
                   </label>
                 ))}
               </div>
