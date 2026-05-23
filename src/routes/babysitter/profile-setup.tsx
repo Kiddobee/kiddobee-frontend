@@ -365,7 +365,7 @@ function BabysitterProfileSetup() {
       </header>
 
       <div className="py-8 px-4">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
         <h1 className="text-xl font-bold text-gray-900 mb-6">Your profile</h1>
 
