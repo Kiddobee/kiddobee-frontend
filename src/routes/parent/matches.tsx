@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { LogOut, LayoutGrid, User, ChevronDown, ChevronUp, Video, AlertCircle, X } from "lucide-react";
+import { LogOut, LayoutGrid, User, ChevronDown, ChevronUp, Video, AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/parent/matches")({
   head: () => ({ meta: [{ title: "My Matches — Kiddobee" }] }),
@@ -322,8 +322,6 @@ function InterviewCard({ interview }: { interview: any }) {
 function ParentMatchesPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const [showBanner, setShowBanner] = useState(true);
-
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
   }, [user, loading]);
@@ -416,7 +414,7 @@ function ParentMatchesPage() {
         </div>
       </header>
 
-      {showBanner && !loading && !parentLoading && parent !== undefined && completion < 100 && (
+      {!loading && !parentLoading && parent !== undefined && completion < 100 && (
         <div className="border-l-4 border-amber-400 bg-[#FEF9C3] px-4 py-4">
           <div className="max-w-3xl mx-auto flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
@@ -437,9 +435,6 @@ function ParentMatchesPage() {
                 </button>
               </Link>
             </div>
-            <button onClick={() => setShowBanner(false)} className="p-1 rounded text-amber-500 hover:text-amber-700 hover:bg-amber-100 transition-colors flex-shrink-0">
-              <X className="h-4 w-4" />
-            </button>
           </div>
         </div>
       )}
