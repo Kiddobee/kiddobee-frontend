@@ -66,8 +66,8 @@ function fromInputDate(v: string): string {
 
 function BabysitterProfileSetup() {
   const navigate = useNavigate();
-  const { language } = useI18n();
-  const DAYS = language === "en" ? DAYS_EN : DAYS_FR;
+  const { lang } = useI18n();
+  const DAYS = lang === "en" ? DAYS_EN : DAYS_FR;
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
