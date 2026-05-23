@@ -416,7 +416,7 @@ function ParentMatchesPage() {
         </div>
       </header>
 
-      {showBanner && !parentLoading && completion < 100 && (
+      {showBanner && !loading && !parentLoading && !!parent && completion < 100 && (
         <div className="border-l-4 border-amber-400 bg-[#FEF9C3] px-4 py-4">
           <div className="max-w-3xl mx-auto flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
