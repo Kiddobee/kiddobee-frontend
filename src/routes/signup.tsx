@@ -46,7 +46,10 @@ function SignupPage() {
       if (authError) throw authError;
 
       const user = authData.user;
-      if (!user) throw new Error("Signup failed — please try again.");
+      // user is null when the email is already registered (Supabase returns
+      // a fake success to prevent enumeration). Treat it the same as a fresh
+      // signup — the verification email was already sent on a prior attempt.
+      if (!user) { setDone(true); return; }
 
       // Insert the profile row best-effort. This may fail if RLS blocks
       // unauthenticated inserts (email confirmation pending), which is fine —
