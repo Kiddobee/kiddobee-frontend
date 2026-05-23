@@ -17,20 +17,32 @@ export const Route = createFileRoute("/babysitter/profile-setup")({
   component: BabysitterProfileSetup,
 });
 
-const STEPS = ["Basic info", "Experience", "Languages", "Availability", "References", "Documents", "Summary"];
+const STEPS_EN = ["Basic info", "Experience", "Languages", "Availability", "References", "Documents", "Summary"];
+const STEPS_FR = ["Infos de base", "Expérience", "Langues", "Disponibilités", "Références", "Documents", "Résumé"];
 
-const AGE_RANGES = ["0-3 ans", "3-6 ans", "6-12 ans", "12 ans et +"];
+const AGE_RANGES_EN = ["0-3 years", "3-6 years", "6-12 years", "12+ years"];
+const AGE_RANGES_FR = ["0-3 ans", "3-6 ans", "6-12 ans", "12 ans et +"];
+const AGE_FR_TO_EN: Record<string, string> = {
+  "0-3 ans": "0-3 years", "3-6 ans": "3-6 years",
+  "6-12 ans": "6-12 years", "12 ans et +": "12+ years",
+};
 
-const MISSIONS = [
+const MISSIONS_EN = [
   "School pickup", "Homework help", "Cooking", "Bathing",
   "Bedtime routine", "Arts and crafts", "Outdoor activities", "Light housekeeping",
   "Overnight care", "Newborn care", "Multiple children", "Special needs care",
+];
+const MISSIONS_FR = [
+  "École (aller-retour)", "Aide aux devoirs", "Cuisine", "Bain",
+  "Rituel du coucher", "Arts créatifs", "Activités extérieures", "Tâches légères",
+  "Garde de nuit", "Soin nouveau-nés", "Plusieurs enfants", "Soins spécialisés",
 ];
 
 const DAYS_EN = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const DAYS_FR = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
 
-const LANG_LEVELS = ["Native", "Fluent", "C2", "C1", "B2", "B1", "A2", "Conversational"];
+const LANG_LEVELS_EN = ["Native", "Fluent", "C2", "C1", "B2", "B1", "A2", "Conversational"];
+const LANG_LEVELS_FR = ["Natif/ve", "Courant", "C2", "C1", "B2", "B1", "A2", "Conversationnel"];
 
 const LANGUAGES = [
   "French", "English", "Spanish", "German", "Italian", "Arabic", "Portuguese",
@@ -38,12 +50,19 @@ const LANGUAGES = [
   "Hindi", "Bengali", "Swahili", "Romanian", "Greek",
 ];
 
-const DOCUMENT_TYPES = [
+const DOCUMENT_TYPES_EN = [
   { key: "profile_photo", label: "Profile photo" },
   { key: "id_card", label: "ID card" },
   { key: "cv", label: "CV" },
   { key: "criminal_record", label: "Criminal record (bulletin n°3)" },
   { key: "certificates", label: "Certificates / diplomas" },
+];
+const DOCUMENT_TYPES_FR = [
+  { key: "profile_photo", label: "Photo de profil" },
+  { key: "id_card", label: "Carte d'identité" },
+  { key: "cv", label: "CV" },
+  { key: "criminal_record", label: "Casier judiciaire (bulletin n°3)" },
+  { key: "certificates", label: "Certificats / diplômes" },
 ];
 
 type LangEntry = { name: string; level: string; accent: string };
@@ -67,7 +86,55 @@ function fromInputDate(v: string): string {
 function BabysitterProfileSetup() {
   const navigate = useNavigate();
   const { lang } = useI18n();
+  const STEPS = lang === "en" ? STEPS_EN : STEPS_FR;
+  const AGE_RANGES = lang === "en" ? AGE_RANGES_EN : AGE_RANGES_FR;
+  const MISSIONS_DISPLAY = lang === "en" ? MISSIONS_EN : MISSIONS_FR;
   const DAYS = lang === "en" ? DAYS_EN : DAYS_FR;
+  const LANG_LEVELS = lang === "en" ? LANG_LEVELS_EN : LANG_LEVELS_FR;
+  const DOCUMENT_TYPES = lang === "en" ? DOCUMENT_TYPES_EN : DOCUMENT_TYPES_FR;
+
+  const p = lang === "en" ? {
+    yourProfile: "Your profile", basicInfo: "Basic info", firstName: "First name",
+    lastName: "Last name", dateOfBirth: "Date of birth", phone: "Phone", city: "City",
+    save: "Save", saving: "Saving…", expTitle: "Experience", yearsExp: "Years of experience",
+    ageRanges: "Comfortable age ranges", missions: "Proposed missions",
+    diplomas: "Diplomas & certifications", diplomasPlaceholder: "e.g. CAP Petite Enfance, First Aid certificate…",
+    langTitle: "Languages", langLabel: "Language", langLevelLabel: "Level", accentLabel: "Accent",
+    addLanguage: "Add language", availTitle: "Availability", startDate: "Start date",
+    endDate: "End date", endDateHint: "(leave blank = open)", availDays: "Available days",
+    refsTitle: "References", addSecondRef: "Please add a second reference if you can.",
+    refLabel: "Reference", refName: "Name", refDesc: "Description", refFullName: "Full name",
+    refHowKnow: "How do you know them?", addReference: "Add reference", docsTitle: "Documents",
+    notUploaded: "Not uploaded", uploading: "Uploading…", replace: "Replace", upload: "Upload",
+    summaryTitle: "Summary", submitProfile: "Submit profile", submitting: "Submitting…",
+    back: "Back", next: "Next", summaryName: "Name", summaryPhone: "Phone", summaryCity: "City",
+    summaryDob: "Date of birth", summaryYearsExp: "Years of experience", summaryAgeRanges: "Age ranges",
+    summaryMissions: "Missions", summaryLanguages: "Languages", summaryAvailability: "Availability",
+    summaryAvailDays: "Available days", summaryRefs: "References", summaryDocs: "Documents",
+    summaryDiplomas: "Diplomas", summaryFrom: "From", summaryTo: "to", summaryOpen: "(open)",
+    summaryAdded: "added", summaryNone: "None", summaryUploaded: "uploaded",
+  } : {
+    yourProfile: "Votre profil", basicInfo: "Infos de base", firstName: "Prénom",
+    lastName: "Nom", dateOfBirth: "Date de naissance", phone: "Téléphone", city: "Ville",
+    save: "Enregistrer", saving: "Enregistrement…", expTitle: "Expérience", yearsExp: "Années d'expérience",
+    ageRanges: "Tranches d'âge", missions: "Missions proposées",
+    diplomas: "Diplômes & certifications", diplomasPlaceholder: "ex. CAP Petite Enfance, Brevet de Secourisme…",
+    langTitle: "Langues", langLabel: "Langue", langLevelLabel: "Niveau", accentLabel: "Accent",
+    addLanguage: "Ajouter une langue", availTitle: "Disponibilités", startDate: "Date de début",
+    endDate: "Date de fin", endDateHint: "(laisser vide = ouvert)", availDays: "Jours disponibles",
+    refsTitle: "Références", addSecondRef: "Ajoutez une deuxième référence si possible.",
+    refLabel: "Référence", refName: "Nom", refDesc: "Description", refFullName: "Nom complet",
+    refHowKnow: "Comment vous connaissez-vous ?", addReference: "Ajouter une référence", docsTitle: "Documents",
+    notUploaded: "Non téléchargé", uploading: "Téléchargement…", replace: "Remplacer", upload: "Télécharger",
+    summaryTitle: "Résumé", submitProfile: "Soumettre le profil", submitting: "Envoi…",
+    back: "Retour", next: "Suivant", summaryName: "Nom", summaryPhone: "Téléphone", summaryCity: "Ville",
+    summaryDob: "Date de naissance", summaryYearsExp: "Années d'expérience", summaryAgeRanges: "Tranches d'âge",
+    summaryMissions: "Missions", summaryLanguages: "Langues", summaryAvailability: "Disponibilité",
+    summaryAvailDays: "Jours disponibles", summaryRefs: "Références", summaryDocs: "Documents",
+    summaryDiplomas: "Diplômes", summaryFrom: "Du", summaryTo: "au", summaryOpen: "(ouvert)",
+    summaryAdded: "ajoutée(s)", summaryNone: "Aucun(e)", summaryUploaded: "téléchargé(s)",
+  };
+
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
@@ -125,7 +192,7 @@ function BabysitterProfileSetup() {
 
       // Step 2
       setYearsExp(s["Years of Experience"] != null ? String(s["Years of Experience"]) : "");
-      setAgeRanges(s["Comfortable Age Ranges"] ? s["Comfortable Age Ranges"].split(", ").filter(Boolean) : []);
+      setAgeRanges(s["Comfortable Age Ranges"] ? s["Comfortable Age Ranges"].split(", ").filter(Boolean).map((v: string) => AGE_FR_TO_EN[v] ?? v) : []);
       setMissions(s["Proposed Missions"] ? s["Proposed Missions"].split(", ").filter(Boolean) : []);
       setDiplomas(s["diplomas"] ?? "");
 
@@ -370,7 +437,7 @@ function BabysitterProfileSetup() {
       <div className="py-8 px-4">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <h1 className="text-xl font-bold text-gray-900 mb-6">Your profile</h1>
+        <h1 className="text-xl font-bold text-gray-900 mb-6">{p.yourProfile}</h1>
 
         {/* Tab navigation */}
         <div className="flex flex-nowrap gap-1.5 overflow-x-auto mb-6">
@@ -399,33 +466,33 @@ function BabysitterProfileSetup() {
           {/* STEP 1 — Basic info */}
           {step === 1 && (
             <>
-              <h2 className="text-base font-semibold text-gray-900">Basic info</h2>
+              <h2 className="text-base font-semibold text-gray-900">{p.basicInfo}</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label>First name</Label>
+                  <Label>{p.firstName}</Label>
                   <Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Marie" />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Last name</Label>
+                  <Label>{p.lastName}</Label>
                   <Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Dupont" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label>Date of birth</Label>
+                  <Label>{p.dateOfBirth}</Label>
                   <Input type="date" value={dob} onChange={e => setDob(e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Phone</Label>
+                  <Label>{p.phone}</Label>
                   <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+33 6 …" />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label>City</Label>
+                <Label>{p.city}</Label>
                 <Input value={city} onChange={e => setCity(e.target.value)} placeholder="Paris 11e" />
               </div>
               <Button onClick={saveStep1} disabled={saving} className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white">
-                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</> : "Save"}
+                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{p.saving}</> : p.save}
               </Button>
             </>
           )}
@@ -433,52 +500,52 @@ function BabysitterProfileSetup() {
           {/* STEP 2 — Experience */}
           {step === 2 && (
             <>
-              <h2 className="text-base font-semibold text-gray-900">Experience</h2>
+              <h2 className="text-base font-semibold text-gray-900">{p.expTitle}</h2>
               <div className="space-y-1.5">
-                <Label>Years of experience</Label>
+                <Label>{p.yearsExp}</Label>
                 <Input type="number" min={0} max={30} value={yearsExp} onChange={e => setYearsExp(e.target.value)} placeholder="e.g. 3" />
               </div>
               <div className="space-y-2">
-                <Label>Comfortable age ranges</Label>
+                <Label>{p.ageRanges}</Label>
                 <div className="space-y-2">
-                  {AGE_RANGES.map(r => (
-                    <label key={r} className="flex items-center gap-2 cursor-pointer p-2.5 rounded-lg border border-gray-100 hover:border-[#00B4D8]/30">
+                  {AGE_RANGES_EN.map((key, idx) => (
+                    <label key={key} className="flex items-center gap-2 cursor-pointer p-2.5 rounded-lg border border-gray-100 hover:border-[#00B4D8]/30">
                       <Checkbox
-                        checked={ageRanges.includes(r)}
-                        onCheckedChange={() => setAgeRanges(toggleArr(ageRanges, r))}
+                        checked={ageRanges.includes(key)}
+                        onCheckedChange={() => setAgeRanges(toggleArr(ageRanges, key))}
                         className="data-[state=checked]:bg-[#00B4D8] data-[state=checked]:border-[#00B4D8]"
                       />
-                      <span className="text-sm">{r}</span>
+                      <span className="text-sm">{AGE_RANGES[idx]}</span>
                     </label>
                   ))}
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Proposed missions</Label>
+                <Label>{p.missions}</Label>
                 <div className="grid grid-cols-3 gap-2">
-                  {MISSIONS.map(m => (
-                    <label key={m} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border border-gray-100 hover:border-[#00B4D8]/30">
+                  {MISSIONS_EN.map((key, idx) => (
+                    <label key={key} className="flex items-center gap-2 cursor-pointer p-2 rounded-lg border border-gray-100 hover:border-[#00B4D8]/30">
                       <Checkbox
-                        checked={missions.includes(m)}
-                        onCheckedChange={() => setMissions(toggleArr(missions, m))}
+                        checked={missions.includes(key)}
+                        onCheckedChange={() => setMissions(toggleArr(missions, key))}
                         className="data-[state=checked]:bg-[#00B4D8] data-[state=checked]:border-[#00B4D8]"
                       />
-                      <span className="text-xs">{m}</span>
+                      <span className="text-xs">{MISSIONS_DISPLAY[idx]}</span>
                     </label>
                   ))}
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label>Diplomas &amp; certifications</Label>
+                <Label>{p.diplomas}</Label>
                 <Textarea
                   value={diplomas}
                   onChange={e => setDiplomas(e.target.value)}
                   rows={3}
-                  placeholder="e.g. CAP Petite Enfance, First Aid certificate…"
+                  placeholder={p.diplomasPlaceholder}
                 />
               </div>
               <Button onClick={saveStep2} disabled={saving} className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white">
-                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</> : "Save"}
+                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{p.saving}</> : p.save}
               </Button>
             </>
           )}
@@ -486,12 +553,12 @@ function BabysitterProfileSetup() {
           {/* STEP 3 — Languages */}
           {step === 3 && (
             <>
-              <h2 className="text-base font-semibold text-gray-900">Languages</h2>
+              <h2 className="text-base font-semibold text-gray-900">{p.langTitle}</h2>
               <div className="space-y-3">
                 {languages.map((l, i) => (
                   <div key={i} className="flex gap-2 items-end flex-wrap">
                     <div className="flex-1 min-w-[120px] space-y-1">
-                      <Label className="text-xs text-gray-500">Language</Label>
+                      <Label className="text-xs text-gray-500">{p.langLabel}</Label>
                       <Input
                         value={l.name}
                         onChange={e => setLanguages(prev => prev.map((x, idx) => idx === i ? { ...x, name: e.target.value } : x))}
@@ -499,19 +566,23 @@ function BabysitterProfileSetup() {
                         list={`lang-list-${i}`}
                       />
                       <datalist id={`lang-list-${i}`}>
-                        {LANGUAGES.map(lang => <option key={lang} value={lang} />)}
+                        {LANGUAGES.map(lg => <option key={lg} value={lg} />)}
                       </datalist>
                     </div>
                     <div className="w-36 space-y-1">
-                      <Label className="text-xs text-gray-500">Level</Label>
+                      <Label className="text-xs text-gray-500">{p.langLevelLabel}</Label>
                       <Select value={l.level} onValueChange={v => setLanguages(prev => prev.map((x, idx) => idx === i ? { ...x, level: v } : x))}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>{LANG_LEVELS.map(lv => <SelectItem key={lv} value={lv}>{lv}</SelectItem>)}</SelectContent>
+                        <SelectContent>
+                          {LANG_LEVELS_EN.map((key, idx) => (
+                            <SelectItem key={key} value={key}>{LANG_LEVELS[idx]}</SelectItem>
+                          ))}
+                        </SelectContent>
                       </Select>
                     </div>
                     {l.name.toLowerCase() === "english" && (
                       <div className="w-28 space-y-1">
-                        <Label className="text-xs text-gray-500">Accent</Label>
+                        <Label className="text-xs text-gray-500">{p.accentLabel}</Label>
                         <Input
                           value={l.accent}
                           onChange={e => setLanguages(prev => prev.map((x, idx) => idx === i ? { ...x, accent: e.target.value } : x))}
@@ -536,12 +607,12 @@ function BabysitterProfileSetup() {
                     onClick={() => setLanguages(prev => [...prev, { name: "", level: "Fluent", accent: "" }])}
                     className="flex items-center gap-1.5 text-sm text-[#00B4D8] hover:text-[#0096B4] font-medium"
                   >
-                    <Plus className="h-4 w-4" /> Add language
+                    <Plus className="h-4 w-4" /> {p.addLanguage}
                   </button>
                 )}
               </div>
               <Button onClick={saveStep3} disabled={saving} className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white">
-                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</> : "Save"}
+                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{p.saving}</> : p.save}
               </Button>
             </>
           )}
@@ -549,19 +620,19 @@ function BabysitterProfileSetup() {
           {/* STEP 4 — Availability */}
           {step === 4 && (
             <>
-              <h2 className="text-base font-semibold text-gray-900">Availability</h2>
+              <h2 className="text-base font-semibold text-gray-900">{p.availTitle}</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <Label>Start date</Label>
+                  <Label>{p.startDate}</Label>
                   <Input type="date" value={availStart} onChange={e => setAvailStart(e.target.value)} />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>End date <span className="text-gray-400 font-normal">(leave blank = open)</span></Label>
+                  <Label>{p.endDate} <span className="text-gray-400 font-normal">{p.endDateHint}</span></Label>
                   <Input type="date" value={availEnd} onChange={e => setAvailEnd(e.target.value)} />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Available days</Label>
+                <Label>{p.availDays}</Label>
                 {DAYS_EN.map((key, idx) => (
                   <label key={key} className="flex items-center gap-3 cursor-pointer p-2.5 rounded-lg border border-gray-100 hover:border-[#00B4D8]/30">
                     <Checkbox
@@ -574,7 +645,7 @@ function BabysitterProfileSetup() {
                 ))}
               </div>
               <Button onClick={saveStep4} disabled={saving} className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white">
-                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</> : "Save"}
+                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{p.saving}</> : p.save}
               </Button>
             </>
           )}
@@ -582,9 +653,9 @@ function BabysitterProfileSetup() {
           {/* STEP 5 — References */}
           {step === 5 && (
             <>
-              <h2 className="text-base font-semibold text-gray-900">References</h2>
+              <h2 className="text-base font-semibold text-gray-900">{p.refsTitle}</h2>
               <p className="text-xs text-[#00B4D8] bg-[#00B4D8]/5 rounded-lg px-3 py-2">
-                Please add a second reference if you can.
+                {p.addSecondRef}
               </p>
               <div className="space-y-4">
                 {references.map((ref, i) => (
@@ -596,18 +667,18 @@ function BabysitterProfileSetup() {
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Reference {i + 1}</p>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{p.refLabel} {i + 1}</p>
                     <div className="space-y-1.5">
-                      <Label>Name</Label>
-                      <Input value={ref.name} onChange={e => setReferences(prev => prev.map((r, idx) => idx === i ? { ...r, name: e.target.value } : r))} placeholder="Full name" />
+                      <Label>{p.refName}</Label>
+                      <Input value={ref.name} onChange={e => setReferences(prev => prev.map((r, idx) => idx === i ? { ...r, name: e.target.value } : r))} placeholder={p.refFullName} />
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Description</Label>
-                      <Input value={ref.description} onChange={e => setReferences(prev => prev.map((r, idx) => idx === i ? { ...r, description: e.target.value } : r))} placeholder="How do you know them?" />
+                      <Label>{p.refDesc}</Label>
+                      <Input value={ref.description} onChange={e => setReferences(prev => prev.map((r, idx) => idx === i ? { ...r, description: e.target.value } : r))} placeholder={p.refHowKnow} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label>Phone</Label>
+                        <Label>{p.phone}</Label>
                         <Input value={ref.phone} onChange={e => setReferences(prev => prev.map((r, idx) => idx === i ? { ...r, phone: e.target.value } : r))} placeholder="+33 6 …" />
                       </div>
                       <div className="space-y-1.5">
@@ -622,11 +693,11 @@ function BabysitterProfileSetup() {
                   onClick={() => setReferences(prev => [...prev, { name: "", description: "", phone: "", email: "" }])}
                   className="flex items-center gap-1.5 text-sm text-[#00B4D8] hover:text-[#0096B4] font-medium"
                 >
-                  <Plus className="h-4 w-4" /> Add reference
+                  <Plus className="h-4 w-4" /> {p.addReference}
                 </button>
               </div>
               <Button onClick={saveStep5} disabled={saving} className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white">
-                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</> : "Save"}
+                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{p.saving}</> : p.save}
               </Button>
             </>
           )}
@@ -634,7 +705,7 @@ function BabysitterProfileSetup() {
           {/* STEP 6 — Documents */}
           {step === 6 && (
             <>
-              <h2 className="text-base font-semibold text-gray-900">Documents</h2>
+              <h2 className="text-base font-semibold text-gray-900">{p.docsTitle}</h2>
               <div className="space-y-2">
                 {DOCUMENT_TYPES.map(doc => {
                   const uploaded = documents[doc.key];
@@ -648,7 +719,7 @@ function BabysitterProfileSetup() {
                             <span className="text-green-600 flex items-center gap-1">
                               <Check className="h-3 w-3" /> {uploaded.filename}
                             </span>
-                          ) : "Not uploaded"}
+                          ) : p.notUploaded}
                         </p>
                       </div>
                       <div>
@@ -668,7 +739,7 @@ function BabysitterProfileSetup() {
                           onClick={() => fileRefs.current[doc.key]?.click()}
                           className="border-[#00B4D8] text-[#00B4D8] hover:bg-[#00B4D8]/5 text-xs"
                         >
-                          {isUploading ? <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Uploading…</> : <><Upload className="h-3 w-3 mr-1" />{uploaded ? "Replace" : "Upload"}</>}
+                          {isUploading ? <><Loader2 className="h-3 w-3 mr-1 animate-spin" />{p.uploading}</> : <><Upload className="h-3 w-3 mr-1" />{uploaded ? p.replace : p.upload}</>}
                         </Button>
                       </div>
                     </div>
@@ -676,7 +747,7 @@ function BabysitterProfileSetup() {
                 })}
               </div>
               <Button onClick={saveStep6} disabled={saving} className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white">
-                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving…</> : "Save"}
+                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{p.saving}</> : p.save}
               </Button>
             </>
           )}
@@ -684,22 +755,22 @@ function BabysitterProfileSetup() {
           {/* STEP 7 — Summary */}
           {step === 7 && (
             <>
-              <h2 className="text-base font-semibold text-gray-900">Summary</h2>
+              <h2 className="text-base font-semibold text-gray-900">{p.summaryTitle}</h2>
               <div className="space-y-2 text-sm">
                 {[
-                  ["Name", `${firstName} ${lastName}`.trim() || "—"],
-                  ["Phone", phone || "—"],
-                  ["City", city || "—"],
-                  ["Date of birth", dob || "—"],
-                  ["Years of experience", yearsExp || "—"],
-                  ["Age ranges", ageRanges.join(", ") || "—"],
-                  ["Missions", missions.join(", ") || "—"],
-                  ["Languages", languages.filter(l => l.name).map(l => `${l.name} (${l.level})`).join(", ") || "—"],
-                  ["Availability", availStart ? `From ${availStart}${availEnd ? ` to ${availEnd}` : " (open)"}` : "—"],
-                  ["Available days", availDays.join(", ") || "—"],
-                  ["References", references.length > 0 ? `${references.length} added` : "None"],
-                  ["Documents", Object.keys(documents).length > 0 ? `${Object.keys(documents).length}/5 uploaded` : "None"],
-                  ["Diplomas", diplomas || "—"],
+                  [p.summaryName, `${firstName} ${lastName}`.trim() || "—"],
+                  [p.summaryPhone, phone || "—"],
+                  [p.summaryCity, city || "—"],
+                  [p.summaryDob, dob || "—"],
+                  [p.summaryYearsExp, yearsExp || "—"],
+                  [p.summaryAgeRanges, ageRanges.map(k => AGE_RANGES[AGE_RANGES_EN.indexOf(k)] ?? k).join(", ") || "—"],
+                  [p.summaryMissions, missions.map(k => MISSIONS_DISPLAY[MISSIONS_EN.indexOf(k)] ?? k).join(", ") || "—"],
+                  [p.summaryLanguages, languages.filter(l => l.name).map(l => `${l.name} (${LANG_LEVELS[LANG_LEVELS_EN.indexOf(l.level)] ?? l.level})`).join(", ") || "—"],
+                  [p.summaryAvailability, availStart ? `${p.summaryFrom} ${availStart}${availEnd ? ` ${p.summaryTo} ${availEnd}` : ` ${p.summaryOpen}`}` : "—"],
+                  [p.summaryAvailDays, availDays.map(k => DAYS[DAYS_EN.indexOf(k)] ?? k).join(", ") || "—"],
+                  [p.summaryRefs, references.length > 0 ? `${references.length} ${p.summaryAdded}` : p.summaryNone],
+                  [p.summaryDocs, Object.keys(documents).length > 0 ? `${Object.keys(documents).length}/5 ${p.summaryUploaded}` : p.summaryNone],
+                  [p.summaryDiplomas, diplomas || "—"],
                 ].map(([label, value]) => (
                   <div key={label} className="flex justify-between gap-4 py-1.5 border-b border-gray-50 last:border-0">
                     <span className="text-gray-500 shrink-0">{label}</span>
@@ -712,7 +783,7 @@ function BabysitterProfileSetup() {
                 disabled={saving}
                 className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white mt-2"
               >
-                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Submitting…</> : "Submit profile"}
+                {saving ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />{p.submitting}</> : p.submitProfile}
               </Button>
             </>
           )}
@@ -726,7 +797,7 @@ function BabysitterProfileSetup() {
               onClick={() => setStep(s => s - 1)}
               className="flex-1"
             >
-              <ChevronLeft className="h-4 w-4 mr-1" /> Back
+              <ChevronLeft className="h-4 w-4 mr-1" /> {p.back}
             </Button>
           )}
           {step < 7 && (
@@ -734,7 +805,7 @@ function BabysitterProfileSetup() {
               onClick={() => setStep(s => s + 1)}
               className="flex-1 bg-[#00B4D8] hover:bg-[#0096B4] text-white"
             >
-              Next <ChevronRight className="h-4 w-4 ml-1" />
+              {p.next} <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           )}
         </div>
