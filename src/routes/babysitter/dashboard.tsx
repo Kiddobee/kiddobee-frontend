@@ -1,161 +1,168 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useAuth, signOut } from "@/lib/auth";
 import { LanguageToggle } from "@/lib/i18n";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
-import { LogOut, CheckCircle, Clock, Eye, Star } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { LogOut, LayoutDashboard, UserCircle, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/babysitter/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Kiddobee" }] }),
   component: BabysitterDashboard,
 });
 
-function statusColor(s: string) {
-  if (s === "Verified") return "bg-green-100 text-green-700 border-green-200";
-  if (s === "Submitted") return "bg-yellow-100 text-yellow-700 border-yellow-200";
-  return "bg-gray-100 text-gray-600 border-gray-200";
-}
-
-function profileCompletionPct(sitter: any): number {
-  const fields = [
-    sitter?.["Location"],
-    sitter?.["Language 1"],
-    sitter?.["Years of Experience"],
-    sitter?.["Comfortable Age Ranges"],
-    sitter?.["Proposed Missions"],
-    sitter?.["↳ Energy (1-5)"],
-    sitter?.["Notes"],
+function profileCompletion(sitter: any): number {
+  const checks = [
+    !!(sitter?.["First Name"] && sitter?.["Location"]),
+    !!(sitter?.["Years of Experience"] !== null && sitter?.["Years of Experience"] !== undefined && sitter?.["Comfortable Age Ranges"]),
+    !!sitter?.["Language 1"],
+    !!sitter?.["Availability Start Date"],
+    !!sitter?.["references_data"],
+    !!sitter?.["documents_data"],
+    sitter?.["Profile Status"] === "Submitted" || sitter?.["Profile Status"] === "Verified",
   ];
-  const filled = fields.filter(Boolean).length;
-  return Math.round((filled / fields.length) * 100);
+  return Math.round((checks.filter(Boolean).length / 7) * 100);
 }
 
 function BabysitterDashboard() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => { if (!loading && !user) navigate({ to: "/login" }); }, [user, loading]);
+  useEffect(() => {
+    if (!loading && !user) navigate({ to: "/login" });
+  }, [user, loading]);
 
   const sitterId = user?.user_metadata?.profileId as string | undefined;
+  const firstName = user?.user_metadata?.firstName ?? "there";
 
   const { data: sitter, isLoading } = useQuery({
     queryKey: ["sitter-profile", sitterId],
     queryFn: async () => {
+      if (!sitterId) return null;
       const { data } = await supabase.from("Babysitter").select("*").eq("Sitter ID", sitterId).single();
       return data;
     },
     enabled: Boolean(sitterId),
   });
 
-  const completionPct = sitter ? profileCompletionPct(sitter) : 0;
-  const status = sitter?.["Profile Status"] ?? "Submitted";
-  const firstName = user?.user_metadata?.firstName ?? sitter?.["First Name"] ?? "there";
+  const completion = sitter ? profileCompletion(sitter) : 0;
+  const status = sitter?.["Profile Status"] ?? "Pending";
+  const displayFirstName = sitter?.["First Name"] ?? firstName;
 
-  if (loading || isLoading) return (
-    <div className="min-h-screen bg-gray-50 p-4">
-      <div className="max-w-2xl mx-auto space-y-4 mt-8">
-        <Skeleton className="h-10 w-60" />
-        <Skeleton className="h-32 w-full rounded-2xl" />
-        <Skeleton className="h-32 w-full rounded-2xl" />
+  if (loading || isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F3F4F6]">
+        <div className="bg-white border-b h-14" />
+        <div className="max-w-3xl mx-auto px-4 py-8 space-y-4">
+          <Skeleton className="h-10 w-60" />
+          <Skeleton className="h-5 w-40" />
+          <div className="grid grid-cols-2 gap-4 mt-6">
+            {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-40 rounded-2xl" />)}
+          </div>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+    <div className="min-h-screen bg-[#F3F4F6]">
+      {/* Navbar */}
       <header className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#00B4D8] flex items-center justify-center text-white font-bold text-sm">K</div>
-            <span className="font-semibold text-gray-900">Kiddobee</span>
+        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2 shrink-0">
+            <img src="/logo.avif" alt="Kiddobee" className="h-8 w-auto object-contain" />
+            <span className="text-xs font-medium text-[#00B4D8] border border-[#00B4D8]/30 bg-[#00B4D8]/5 rounded-full px-2 py-0.5">Babysitter</span>
           </div>
-          <div className="flex items-center gap-3">
+          <nav className="flex items-center gap-1">
+            <Link to="/babysitter/dashboard">
+              {({ isActive }) => (
+                <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8]/10 text-[#00B4D8]" : "text-gray-500 hover:text-gray-700"}`}>
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </span>
+              )}
+            </Link>
+            <Link to="/babysitter/profile-setup">
+              {({ isActive }) => (
+                <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8]/10 text-[#00B4D8]" : "text-gray-500 hover:text-gray-700"}`}>
+                  <UserCircle className="h-4 w-4" />
+                  Profile
+                </span>
+              )}
+            </Link>
+          </nav>
+          <div className="flex items-center gap-2 shrink-0">
             <LanguageToggle />
-            <Button variant="ghost" size="sm" onClick={() => signOut().then(() => navigate({ to: "/login" }))}>
+            <button
+              onClick={() => signOut().then(() => navigate({ to: "/login" }))}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+            >
               <LogOut className="h-4 w-4" />
-            </Button>
+            </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-8 space-y-5">
+      <main className="max-w-3xl mx-auto px-4 py-8">
         {/* Welcome */}
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Welcome, {firstName} 👋</h1>
-          <p className="text-gray-500 mt-1">Here's your babysitter profile overview</p>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">Welcome, {displayFirstName}</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Status:{" "}
+            <span className={
+              status === "Verified" ? "text-green-600 font-medium" :
+              status === "Submitted" ? "text-blue-600 font-medium" :
+              "text-yellow-600 font-medium"
+            }>
+              {status}
+            </span>
+          </p>
         </div>
 
-        {/* Status */}
-        <Card>
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {status === "Verified" ? <CheckCircle className="h-6 w-6 text-green-500" /> : <Clock className="h-6 w-6 text-yellow-500" />}
-              <div>
-                <p className="font-medium text-gray-900">Profile status</p>
-                <p className="text-sm text-gray-500">{status === "Verified" ? "You're verified and visible to parents" : "Your profile is under review"}</p>
-              </div>
-            </div>
-            <Badge variant="outline" className={statusColor(status)}>{status}</Badge>
-          </CardContent>
-        </Card>
-
-        {/* Profile completion */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">Profile completion</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+        {/* 4 cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Card 1: Profile completion */}
+          <div className="bg-white rounded-2xl shadow-sm p-5 flex flex-col gap-3">
+            <h3 className="font-semibold text-gray-900">Profile completion</h3>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">Complete your profile to get matched</span>
-              <span className="font-semibold text-[#00B4D8]">{completionPct}%</span>
+              <span className="text-gray-500">Progress</span>
+              <span className="font-bold text-[#00B4D8]">{completion}%</span>
             </div>
-            <Progress value={completionPct} className="h-2.5 [&>[role=progressbar]]:bg-[#00B4D8]" />
-            {completionPct < 100 && (
-              <Button variant="outline" size="sm" onClick={() => navigate({ to: "/babysitter/profile-setup" })} className="border-[#00B4D8] text-[#00B4D8] hover:bg-[#00B4D8]/5">
-                Continue profile setup
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+            <Progress value={completion} className="h-2 [&>[role=progressbar]]:bg-[#00B4D8]" />
+            <Button
+              size="sm"
+              onClick={() => navigate({ to: "/babysitter/profile-setup" })}
+              className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white text-sm mt-1"
+            >
+              Continue your profile
+            </Button>
+          </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 gap-4">
-          <Card>
-            <CardContent className="p-5 text-center">
-              <Eye className="h-6 w-6 text-[#00B4D8] mx-auto mb-2" />
-              <div className="text-2xl font-bold text-gray-900">{sitter?.["Total Times Presented"] ?? 0}</div>
-              <p className="text-xs text-gray-500 mt-1">Profile views</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-5 text-center">
-              <Star className="h-6 w-6 text-[#FFD700] mx-auto mb-2" />
-              <div className="text-2xl font-bold text-gray-900">{sitter?.["Ratings Score /30"] ?? "—"}</div>
-              <p className="text-xs text-gray-500 mt-1">Rating /30</p>
-            </CardContent>
-          </Card>
+          {/* Card 2: HR Interview */}
+          <div className="bg-white rounded-2xl shadow-sm p-5 flex flex-col gap-3">
+            <h3 className="font-semibold text-gray-900">HR Interview</h3>
+            <div className="flex items-center gap-2 text-sm">
+              <Clock className="h-4 w-4 text-gray-400 shrink-0" />
+              <span className="text-gray-600">Status: <span className="font-medium text-gray-800">Not scheduled</span></span>
+            </div>
+            <p className="text-xs text-gray-400">You'll be notified once your interview is booked by our team.</p>
+          </div>
+
+          {/* Card 3: Notifications */}
+          <div className="bg-white rounded-2xl shadow-sm p-5 flex flex-col gap-3">
+            <h3 className="font-semibold text-gray-900">Notifications</h3>
+            <p className="text-sm text-gray-400">No notifications yet.</p>
+          </div>
+
+          {/* Card 4: Match & Schedule */}
+          <div className="bg-white rounded-2xl shadow-sm p-5 flex flex-col gap-3">
+            <h3 className="font-semibold text-gray-900">Match &amp; schedule</h3>
+            <p className="text-sm text-gray-400">Once you're matched with a family, their details and schedule will appear here.</p>
+          </div>
         </div>
-
-        {/* Profile summary */}
-        {sitter && (
-          <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base font-semibold">Your profile</CardTitle></CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              {sitter["Location"] && <div className="flex justify-between"><span className="text-gray-500">Location</span><span className="font-medium">{sitter["Location"]}</span></div>}
-              {sitter["Years of Experience"] && <div className="flex justify-between"><span className="text-gray-500">Experience</span><span className="font-medium">{sitter["Years of Experience"]} years</span></div>}
-              {sitter["Language 1"] && <div className="flex justify-between"><span className="text-gray-500">Languages</span><span className="font-medium">{[1,2,3,4,5].map(n => sitter[`Language ${n}`]).filter(Boolean).join(", ")}</span></div>}
-              {sitter["Comfortable Age Ranges"] && <div className="flex justify-between"><span className="text-gray-500">Age ranges</span><span className="font-medium text-right">{sitter["Comfortable Age Ranges"]}</span></div>}
-              {sitter["Availability End Date"] && <div className="flex justify-between"><span className="text-gray-500">Available until</span><span className="font-medium">{sitter["Availability End Date"]}</span></div>}
-            </CardContent>
-          </Card>
-        )}
       </main>
     </div>
   );
