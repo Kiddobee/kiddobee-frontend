@@ -278,6 +278,8 @@ function BabysitterProfileSetup() {
     4: saveStep4, 5: saveStep5, 6: saveStep6,
   };
 
+  const displayFirstName = navFirstName || firstName;
+
   if (dataLoading) {
     return (
       <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center">
@@ -293,7 +295,7 @@ function BabysitterProfileSetup() {
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 shrink-0">
             <div className="w-9 h-9 rounded-full bg-[#00B4D8] flex items-center justify-center text-white font-bold text-sm shrink-0">
-              {(navFirstName || firstName).charAt(0).toUpperCase() || "K"}
+              {displayFirstName.charAt(0).toUpperCase()}
             </div>
             <div className="leading-tight">
               <p className="text-white font-semibold text-sm leading-none">Kiddobee</p>
