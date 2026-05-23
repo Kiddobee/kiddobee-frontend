@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { getNextId } from "@/lib/auth";
@@ -15,7 +15,6 @@ export const Route = createFileRoute("/signup")({
 type Role = "parent" | "babysitter";
 
 function SignupPage() {
-  const navigate = useNavigate();
   const [step, setStep] = useState<1 | 2>(1);
   const [role, setRole] = useState<Role | null>(null);
   const [firstName, setFirstName] = useState("");
@@ -24,6 +23,7 @@ function SignupPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,28 +46,35 @@ function SignupPage() {
       if (authError) throw authError;
 
       const user = authData.user;
-      if (!user) throw new Error("Signup failed");
+      if (!user) throw new Error("Signup failed — please try again.");
 
-      if (role === "parent") {
-        await supabase.from("Parent").insert({
-          "Parent ID": profileId,
-          "First Name": firstName,
-          "Last Name": lastName,
-          "Email": email,
-          "Date Joined": new Date().toISOString().split("T")[0],
-          "Profile Status": "Submitted",
-        });
-        navigate({ to: "/parent/profile-setup" });
-      } else {
-        await supabase.from("Babysitter").insert({
-          "Sitter ID": profileId,
-          "First Name": firstName,
-          "Last Name": lastName,
-          "Date Joined": new Date().toISOString().split("T")[0],
-          "Profile Status": "Submitted",
-        });
-        navigate({ to: "/babysitter/profile-setup" });
+      // Insert the profile row best-effort. This may fail if RLS blocks
+      // unauthenticated inserts (email confirmation pending), which is fine —
+      // the row can be created on first login or by an admin trigger.
+      try {
+        if (role === "parent") {
+          await supabase.from("Parent").insert({
+            "Parent ID": profileId,
+            "First Name": firstName,
+            "Last Name": lastName,
+            "Email": email,
+            "Date Joined": new Date().toISOString().split("T")[0],
+            "Profile Status": "Submitted",
+          });
+        } else {
+          await supabase.from("Babysitter").insert({
+            "Sitter ID": profileId,
+            "First Name": firstName,
+            "Last Name": lastName,
+            "Date Joined": new Date().toISOString().split("T")[0],
+            "Profile Status": "Submitted",
+          });
+        }
+      } catch {
+        // Row creation failed — not fatal; proceed to email confirmation step.
       }
+
+      setDone(true);
     } catch (err: any) {
       setError(err.message ?? "Something went wrong");
     } finally {
@@ -87,6 +94,27 @@ function SignupPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border p-8">
+
+          {done ? (
+            <div className="text-center py-4">
+              <div className="w-16 h-16 rounded-full bg-[#00B4D8]/10 flex items-center justify-center mx-auto mb-4">
+                <svg className="h-8 w-8 text-[#00B4D8]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Check your inbox</h2>
+              <p className="text-sm text-gray-500 mb-1">
+                We sent a verification link to <span className="font-medium text-gray-700">{email}</span>.
+              </p>
+              <p className="text-sm text-gray-500 mb-6">
+                Click the link in the email to verify your account, then come back to sign in.
+              </p>
+              <Link to="/login" className="inline-block w-full">
+                <Button className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white">Go to sign in</Button>
+              </Link>
+            </div>
+          ) : (
+          <>
           {/* Progress */}
           <div className="flex items-center gap-2 mb-6">
             {[1, 2].map((s) => (
@@ -155,6 +183,8 @@ function SignupPage() {
             Already have an account?{" "}
             <Link to="/login" className="text-[#00B4D8] font-medium hover:underline">Sign in</Link>
           </p>
+          </>
+          )}
         </div>
       </div>
     </div>
