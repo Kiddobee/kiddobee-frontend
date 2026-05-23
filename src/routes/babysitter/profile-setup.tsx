@@ -370,7 +370,7 @@ function BabysitterProfileSetup() {
         <h1 className="text-xl font-bold text-gray-900 mb-6">Your profile</h1>
 
         {/* Tab navigation */}
-        <div className="flex gap-1.5 flex-wrap mb-6">
+        <div className="flex gap-1.5 overflow-x-auto mb-6">
           {STEPS.map((label, idx) => {
             const n = idx + 1;
             const active = step === n;
@@ -378,7 +378,7 @@ function BabysitterProfileSetup() {
               <button
                 key={n}
                 onClick={() => setStep(n)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+                className={`px-2 py-1 rounded-lg text-xs font-medium border transition-colors shrink-0 whitespace-nowrap ${
                   active
                     ? "bg-[#00B4D8] border-[#00B4D8] text-white"
                     : "bg-white border-gray-200 text-gray-600 hover:border-[#00B4D8]/50"
