@@ -1,10 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts, useRouterState } from "@tanstack/react-router";
+import { Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts, useRouterState, useNavigate } from "@tanstack/react-router";
 import appCss from "../styles.css?url";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { I18nProvider, LanguageToggle, useI18n } from "@/lib/i18n";
 import { Toaster } from "@/components/ui/sonner";
+import { LogOut } from "lucide-react";
+import { signOut } from "@/lib/auth";
 
 function NotFoundComponent() {
   return (
@@ -70,13 +72,23 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function AdminHeaderBar() {
   const { t } = useI18n();
+  const navigate = useNavigate();
   return (
     <header className="h-14 flex items-center justify-between border-b bg-card px-4 gap-3">
       <div className="flex items-center gap-3">
         <SidebarTrigger />
         <h1 className="text-sm font-semibold text-foreground">{t("brand")}</h1>
       </div>
-      <LanguageToggle />
+      <div className="flex items-center gap-2">
+        <LanguageToggle />
+        <button
+          onClick={() => signOut().then(() => navigate({ to: "/login" }))}
+          className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm text-muted-foreground hover:text-destructive hover:bg-accent transition-colors"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Sign out</span>
+        </button>
+      </div>
     </header>
   );
 }
