@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Plus, X, Upload, Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, Plus, X, Upload, Check, ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import { signOut } from "@/lib/auth";
+import { LanguageToggle } from "@/lib/i18n";
 
 export const Route = createFileRoute("/babysitter/profile-setup")({
   head: () => ({ meta: [{ title: "Profile Setup — Kiddobee" }] }),
@@ -68,6 +70,7 @@ function BabysitterProfileSetup() {
   const [dataLoading, setDataLoading] = useState(true);
   const [sitterId, setSitterId] = useState<string | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [navFirstName, setNavFirstName] = useState("");
   const fileRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   // Step 1 — Basic info
@@ -102,6 +105,7 @@ function BabysitterProfileSetup() {
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setDataLoading(false); return; }
+      setNavFirstName(user.user_metadata?.firstName ?? "");
       const sid = user.user_metadata?.profileId as string | undefined;
       setSitterId(sid ?? null);
       if (!sid) { setDataLoading(false); return; }
@@ -283,7 +287,48 @@ function BabysitterProfileSetup() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F3F4F6] py-8 px-4">
+    <div className="min-h-screen bg-[#F3F4F6]">
+      {/* Navbar */}
+      <header className="bg-black sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-9 h-9 rounded-full bg-[#00B4D8] flex items-center justify-center text-white font-bold text-sm shrink-0">
+              {(navFirstName || firstName).charAt(0).toUpperCase() || "K"}
+            </div>
+            <div className="leading-tight">
+              <p className="text-white font-semibold text-sm leading-none">Kiddobee</p>
+              <p className="text-gray-400 text-xs mt-0.5">Babysitter</p>
+            </div>
+          </div>
+          <nav className="flex items-center gap-1">
+            <Link to="/babysitter/dashboard">
+              {({ isActive }) => (
+                <span className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8] text-white" : "text-gray-400 hover:text-white"}`}>
+                  Dashboard
+                </span>
+              )}
+            </Link>
+            <Link to="/babysitter/profile-setup">
+              {({ isActive }) => (
+                <span className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8] text-white" : "text-gray-400 hover:text-white"}`}>
+                  Profile
+                </span>
+              )}
+            </Link>
+          </nav>
+          <div className="flex items-center gap-2 shrink-0">
+            <LanguageToggle />
+            <button
+              onClick={() => signOut().then(() => navigate({ to: "/login" }))}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-white transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="py-8 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <h1 className="text-xl font-bold text-gray-900 mb-6">Your profile</h1>
@@ -654,6 +699,7 @@ function BabysitterProfileSetup() {
             </Button>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

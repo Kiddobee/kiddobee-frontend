@@ -7,7 +7,7 @@ import { LanguageToggle } from "@/lib/i18n";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { LogOut, LayoutDashboard, UserCircle, Clock } from "lucide-react";
+import { LogOut, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/babysitter/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Kiddobee" }] }),
@@ -55,11 +55,11 @@ function BabysitterDashboard() {
   if (loading || isLoading) {
     return (
       <div className="min-h-screen bg-[#F3F4F6]">
-        <div className="bg-white border-b h-14" />
-        <div className="max-w-3xl mx-auto px-4 py-8 space-y-4">
+        <div className="bg-black h-14" />
+        <div className="max-w-2xl mx-auto px-4 py-8 space-y-4">
           <Skeleton className="h-10 w-60" />
           <Skeleton className="h-5 w-40" />
-          <div className="grid grid-cols-2 gap-4 mt-6">
+          <div className="space-y-4 mt-6">
             {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-40 rounded-2xl" />)}
           </div>
         </div>
@@ -70,25 +70,28 @@ function BabysitterDashboard() {
   return (
     <div className="min-h-screen bg-[#F3F4F6]">
       {/* Navbar */}
-      <header className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 shrink-0">
-            <img src="/logo.avif" alt="Kiddobee" className="h-8 w-auto object-contain" />
-            <span className="text-xs font-medium text-[#00B4D8] border border-[#00B4D8]/30 bg-[#00B4D8]/5 rounded-full px-2 py-0.5">Babysitter</span>
+      <header className="bg-black sticky top-0 z-10">
+        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-9 h-9 rounded-full bg-[#00B4D8] flex items-center justify-center text-white font-bold text-sm shrink-0">
+              {displayFirstName.charAt(0).toUpperCase()}
+            </div>
+            <div className="leading-tight">
+              <p className="text-white font-semibold text-sm leading-none">Kiddobee</p>
+              <p className="text-gray-400 text-xs mt-0.5">Babysitter</p>
+            </div>
           </div>
           <nav className="flex items-center gap-1">
             <Link to="/babysitter/dashboard">
               {({ isActive }) => (
-                <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8]/10 text-[#00B4D8]" : "text-gray-500 hover:text-gray-700"}`}>
-                  <LayoutDashboard className="h-4 w-4" />
+                <span className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8] text-white" : "text-gray-400 hover:text-white"}`}>
                   Dashboard
                 </span>
               )}
             </Link>
             <Link to="/babysitter/profile-setup">
               {({ isActive }) => (
-                <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8]/10 text-[#00B4D8]" : "text-gray-500 hover:text-gray-700"}`}>
-                  <UserCircle className="h-4 w-4" />
+                <span className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8] text-white" : "text-gray-400 hover:text-white"}`}>
                   Profile
                 </span>
               )}
@@ -98,7 +101,7 @@ function BabysitterDashboard() {
             <LanguageToggle />
             <button
               onClick={() => signOut().then(() => navigate({ to: "/login" }))}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+              className="p-1.5 rounded-lg text-gray-400 hover:text-white transition-colors"
             >
               <LogOut className="h-4 w-4" />
             </button>
@@ -106,7 +109,7 @@ function BabysitterDashboard() {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-8">
+      <main className="max-w-2xl mx-auto px-4 py-8">
         {/* Welcome */}
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-gray-900">Welcome, {displayFirstName}</h1>
@@ -122,20 +125,17 @@ function BabysitterDashboard() {
           </p>
         </div>
 
-        {/* 4 cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* 4 cards — single column */}
+        <div className="flex flex-col gap-4">
           {/* Card 1: Profile completion */}
           <div className="bg-white rounded-2xl shadow-sm p-5 flex flex-col gap-3">
             <h3 className="font-semibold text-gray-900">Profile completion</h3>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">Progress</span>
-              <span className="font-bold text-[#00B4D8]">{completion}%</span>
-            </div>
             <Progress value={completion} className="h-2 [&>[role=progressbar]]:bg-[#00B4D8]" />
+            <p className="text-sm text-[#00B4D8] font-medium">{completion}% complete</p>
             <Button
               size="sm"
               onClick={() => navigate({ to: "/babysitter/profile-setup" })}
-              className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white text-sm mt-1"
+              className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white text-sm"
             >
               Continue your profile
             </Button>
