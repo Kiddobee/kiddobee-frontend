@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { PageHeader, LoadingState, EmptyState } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 
-export const Route = createFileRoute("/alerts")({
+export const Route = createFileRoute("/admin/alerts")({
   head: () => ({ meta: [{ title: "Alerts — Kiddobee Admin" }] }),
   component: AlertsPage,
 });
@@ -14,12 +14,8 @@ function AlertsPage() {
   const { t, lang } = useI18n();
   const { data, isLoading } = useQuery({
     queryKey: ["alerts"],
-    queryFn: async () => {
-      const { data } = await supabase.from("Alert").select("*").order("createdAt", { ascending: false });
-      return data ?? [];
-    },
+    queryFn: async () => { const { data } = await supabase.from("Alert").select("*").order("createdAt", { ascending: false }); return data ?? []; },
   });
-
   return (
     <div>
       <PageHeader title={t("alerts")} />

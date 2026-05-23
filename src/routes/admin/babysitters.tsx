@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
-export const Route = createFileRoute("/babysitters")({
+export const Route = createFileRoute("/admin/babysitters")({
   head: () => ({ meta: [{ title: "Babysitters — Kiddobee Admin" }] }),
   component: BabysittersPage,
 });
@@ -22,7 +22,6 @@ function BabysittersPage() {
       return data ?? [];
     },
   });
-
   return (
     <div>
       <PageHeader title={t("babysitters")} />
@@ -32,18 +31,18 @@ function BabysittersPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>{t("name")}</TableHead>
-                <TableHead>{t("stage")}</TableHead>
-                <TableHead>{t("city")}</TableHead>
+                <TableHead>Profile Status</TableHead>
+                <TableHead>Location</TableHead>
                 <TableHead>{t("joined")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((b: any) => (
-                <TableRow key={b.id}>
+              {data.map((b: any, i: number) => (
+                <TableRow key={b["Sitter ID"] ?? i}>
                   <TableCell className="font-medium">{fullName(b)}</TableCell>
-                  <TableCell><Badge variant="secondary">{pick<string>(b, "stage") ?? "—"}</Badge></TableCell>
-                  <TableCell>{pick<string>(b, "city", "ville") ?? "—"}</TableCell>
-                  <TableCell>{fmtDate(pick(b, "Date Joined", "createdAt", "created_at"), locale)}</TableCell>
+                  <TableCell><Badge variant="secondary">{pick<string>(b, "Profile Status") ?? "—"}</Badge></TableCell>
+                  <TableCell>{pick<string>(b, "Location") ?? "—"}</TableCell>
+                  <TableCell>{fmtDate(pick(b, "Date Joined"), locale)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

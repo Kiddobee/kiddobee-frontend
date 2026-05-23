@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 
-export const Route = createFileRoute("/requests")({
+export const Route = createFileRoute("/admin/requests")({
   head: () => ({ meta: [{ title: "Requests — Kiddobee Admin" }] }),
   component: RequestsPage,
 });
@@ -17,12 +17,8 @@ function RequestsPage() {
   const locale = lang === "fr" ? "fr-FR" : "en-US";
   const { data, isLoading } = useQuery({
     queryKey: ["requests"],
-    queryFn: async () => {
-      const { data } = await supabase.from("Request").select("*").order("createdAt", { ascending: false });
-      return data ?? [];
-    },
+    queryFn: async () => { const { data } = await supabase.from("Request").select("*").order("createdAt", { ascending: false }); return data ?? []; },
   });
-
   return (
     <div>
       <PageHeader title={t("requests")} />

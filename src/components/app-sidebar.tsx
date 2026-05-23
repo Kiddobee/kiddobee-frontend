@@ -1,63 +1,43 @@
-import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  LayoutDashboard,
-  Bell,
-  KanbanSquare,
-  Baby,
-  Users,
-  CalendarCheck,
-  Inbox,
-  CalendarClock,
-  FileText,
-  Sparkles,
-} from "lucide-react";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
+import { LayoutDashboard, Bell, KanbanSquare, Baby, Users, CalendarCheck, Inbox, CalendarClock, FileText, Sparkles, LogOut } from "lucide-react";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, useSidebar } from "@/components/ui/sidebar";
 import { useI18n } from "@/lib/i18n";
+import { signOut } from "@/lib/auth";
 
 export function AppSidebar() {
   const currentPath = useRouterState({ select: (s) => s.location.pathname });
   const { setOpenMobile, isMobile } = useSidebar();
   const { t } = useI18n();
+  const navigate = useNavigate();
 
   const sections = [
     {
       label: t("overview"),
       items: [
-        { title: t("dashboard"), url: "/", icon: LayoutDashboard },
-        { title: t("alerts"), url: "/alerts", icon: Bell },
+        { title: t("dashboard"), url: "/admin", icon: LayoutDashboard },
+        { title: t("alerts"), url: "/admin/alerts", icon: Bell },
       ],
     },
     {
       label: t("people"),
       items: [
-        { title: t("pipeline"), url: "/pipeline", icon: KanbanSquare },
-        { title: t("babysitters"), url: "/babysitters", icon: Baby },
-        { title: t("parents"), url: "/parents", icon: Users },
+        { title: t("pipeline"), url: "/admin/pipeline", icon: KanbanSquare },
+        { title: t("babysitters"), url: "/admin/babysitters", icon: Baby },
+        { title: t("parents"), url: "/admin/parents", icon: Users },
       ],
     },
     {
       label: t("operations"),
       items: [
-        { title: t("interviews"), url: "/interviews", icon: CalendarCheck },
-        { title: t("requests"), url: "/requests", icon: Inbox },
-        { title: t("reservations"), url: "/reservations", icon: CalendarClock },
-        { title: t("contracts"), url: "/contracts", icon: FileText },
+        { title: t("interviews"), url: "/admin/interviews", icon: CalendarCheck },
+        { title: t("requests"), url: "/admin/requests", icon: Inbox },
+        { title: t("reservations"), url: "/admin/reservations", icon: CalendarClock },
+        { title: t("contracts"), url: "/admin/contracts", icon: FileText },
       ],
     },
     {
       label: t("matchingSection"),
-      items: [{ title: t("matching"), url: "/matching", icon: Sparkles }],
+      items: [{ title: t("matching"), url: "/admin/matching", icon: Sparkles }],
     },
   ];
 
@@ -65,9 +45,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="px-4 py-5 border-b">
         <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
-            K
-          </div>
+          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">K</div>
           <div className="flex flex-col leading-tight group-data-[collapsible=icon]:hidden">
             <span className="font-bold text-sidebar-foreground">Kiddobee</span>
             <span className="text-xs text-sidebar-foreground/60">Admin</span>
@@ -84,7 +62,7 @@ export function AppSidebar() {
               <SidebarMenu>
                 {section.items.map((item) => (
                   <SidebarMenuItem key={item.url}>
-                    <SidebarMenuButton asChild isActive={currentPath === item.url}>
+                    <SidebarMenuButton asChild isActive={currentPath === item.url || (item.url !== "/admin" && currentPath.startsWith(item.url))}>
                       <Link to={item.url} onClick={() => isMobile && setOpenMobile(false)}>
                         <item.icon className="h-4 w-4" />
                         <span>{item.title}</span>
@@ -97,6 +75,12 @@ export function AppSidebar() {
           </SidebarGroup>
         ))}
       </SidebarContent>
+      <SidebarFooter className="border-t p-2">
+        <SidebarMenuButton onClick={() => signOut().then(() => navigate({ to: "/login" }))} className="text-muted-foreground hover:text-destructive">
+          <LogOut className="h-4 w-4" />
+          <span>Sign out</span>
+        </SidebarMenuButton>
+      </SidebarFooter>
     </Sidebar>
   );
 }

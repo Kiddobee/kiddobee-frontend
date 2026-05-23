@@ -1,22 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import {
-  DndContext,
-  type DragEndEvent,
-  PointerSensor,
-  useDraggable,
-  useDroppable,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
+import { DndContext, type DragEndEvent, PointerSensor, useDraggable, useDroppable, useSensor, useSensors } from "@dnd-kit/core";
 import { supabase, pick, fullName, fmtDate } from "@/lib/supabase";
 import { useI18n } from "@/lib/i18n";
 import { PageHeader, LoadingState } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/pipeline")({
+export const Route = createFileRoute("/admin/pipeline")({
   head: () => ({ meta: [{ title: "Pipeline — Kiddobee Admin" }] }),
   component: PipelinePage,
 });
@@ -38,16 +30,11 @@ function DraggableCard({ id, sitter, locale }: { id: string; sitter: any; locale
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id });
   const style = transform ? { transform: `translate(${transform.x}px, ${transform.y}px)` } : undefined;
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...listeners}
-      {...attributes}
-      className={`rounded-md border bg-card p-3 shadow-sm cursor-grab active:cursor-grabbing select-none ${isDragging ? "opacity-50" : ""}`}
-    >
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes}
+      className={`rounded-md border bg-card p-3 shadow-sm cursor-grab active:cursor-grabbing select-none ${isDragging ? "opacity-50" : ""}`}>
       <p className="text-sm font-medium truncate">{fullName(sitter)}</p>
       <p className="mt-0.5 text-xs text-muted-foreground truncate">
-        {pick<string>(sitter, "city", "ville") ?? "—"} · {fmtDate(pick(sitter, "createdAt", "created_at"), locale)}
+        {pick<string>(sitter, "Location") ?? "—"} · {fmtDate(pick(sitter, "Date Joined"), locale)}
       </p>
     </div>
   );
@@ -71,46 +58,34 @@ function PipelinePage() {
   const locale = lang === "fr" ? "fr-FR" : "en-US";
   const { data, isLoading } = useQuery({
     queryKey: ["babysitters"],
-    queryFn: async () => {
-      const { data } = await supabase.from("Babysitter").select("*");
-      return data ?? [];
-    },
+    queryFn: async () => { const { data } = await supabase.from("Babysitter").select("*"); return data ?? []; },
   });
-
   const [optimistic, setOptimistic] = useState<Record<string, string>>({});
   const mut = useMutation({
     mutationFn: async ({ id, stage }: { id: string; stage: string }) => {
-      const { error } = await supabase.from("Babysitter").update({ stage }).eq("id", id);
+      const { error } = await supabase.from("Babysitter").update({ "Profile Status": stage }).eq("Sitter ID", id);
       if (error) throw error;
     },
-    onError: (_e, vars) => {
-      setOptimistic((m) => { const n = { ...m }; delete n[vars.id]; return n; });
-      toast.error("Could not update stage");
-    },
+    onError: (_e, vars) => { setOptimistic((m) => { const n = { ...m }; delete n[vars.id]; return n; }); toast.error("Could not update stage"); },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["babysitters"] }),
   });
-
   const grouped = useMemo(() => {
     const map: Record<string, any[]> = {};
     STAGES.forEach((s) => (map[s.id] = []));
     (data ?? []).forEach((row: any) => {
-      const sid = optimistic[row.id] ?? stageIdOf(row.stage);
+      const sid = optimistic[row["Sitter ID"]] ?? stageIdOf(row["Profile Status"]);
       (map[sid] ?? map.new).push(row);
     });
     return map;
   }, [data, optimistic]);
-
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
-
   function onDragEnd(e: DragEndEvent) {
     const sitterId = String(e.active.id);
     const target = e.over?.id ? String(e.over.id) : null;
     if (!target) return;
     setOptimistic((m) => ({ ...m, [sitterId]: target }));
-    const label = STAGES.find((s) => s.id === target)?.id ?? target;
-    mut.mutate({ id: sitterId, stage: label });
+    mut.mutate({ id: sitterId, stage: target });
   }
-
   return (
     <div>
       <PageHeader title={t("pipeline")} />
@@ -119,20 +94,12 @@ function PipelinePage() {
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {STAGES.map((st) => (
               <DroppableColumn key={st.id} id={st.id} title={t(st.key)}>
-                {grouped[st.id].length === 0 ? (
-                  <p className="text-xs text-muted-foreground px-1 py-2">—</p>
-                ) : (
-                  grouped[st.id].map((s: any) => (
-                    <DraggableCard key={s.id} id={s.id} sitter={s} locale={locale} />
-                  ))
-                )}
+                {grouped[st.id].length === 0 ? <p className="text-xs text-muted-foreground px-1 py-2">—</p> :
+                  grouped[st.id].map((s: any) => <DraggableCard key={s["Sitter ID"]} id={s["Sitter ID"]} sitter={s} locale={locale} />)}
               </DroppableColumn>
             ))}
           </div>
         </DndContext>
-      )}
-      {(!data || data.length === 0) && !isLoading && (
-        <Card className="mt-6 p-6 text-sm text-muted-foreground">{t("empty")}</Card>
       )}
     </div>
   );

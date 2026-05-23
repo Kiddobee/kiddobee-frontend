@@ -9,60 +9,33 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ReservationsRouteImport } from './routes/reservations'
-import { Route as RequestsRouteImport } from './routes/requests'
-import { Route as PipelineRouteImport } from './routes/pipeline'
-import { Route as ParentsRouteImport } from './routes/parents'
-import { Route as MatchingRouteImport } from './routes/matching'
-import { Route as InterviewsRouteImport } from './routes/interviews'
-import { Route as ContractsRouteImport } from './routes/contracts'
-import { Route as BabysittersRouteImport } from './routes/babysitters'
-import { Route as AlertsRouteImport } from './routes/alerts'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as ParentProfileSetupRouteImport } from './routes/parent/profile-setup'
+import { Route as ParentMatchesRouteImport } from './routes/parent/matches'
+import { Route as BabysitterProfileSetupRouteImport } from './routes/babysitter/profile-setup'
+import { Route as BabysitterDashboardRouteImport } from './routes/babysitter/dashboard'
+import { Route as AdminReservationsRouteImport } from './routes/admin/reservations'
+import { Route as AdminRequestsRouteImport } from './routes/admin/requests'
+import { Route as AdminPipelineRouteImport } from './routes/admin/pipeline'
+import { Route as AdminParentsRouteImport } from './routes/admin/parents'
+import { Route as AdminMatchingRouteImport } from './routes/admin/matching'
+import { Route as AdminInterviewsRouteImport } from './routes/admin/interviews'
+import { Route as AdminContractsRouteImport } from './routes/admin/contracts'
+import { Route as AdminBabysittersRouteImport } from './routes/admin/babysitters'
+import { Route as AdminAlertsRouteImport } from './routes/admin/alerts'
+import { Route as ParentBabysitterIdRouteImport } from './routes/parent/babysitter/$id'
 
-const ReservationsRoute = ReservationsRouteImport.update({
-  id: '/reservations',
-  path: '/reservations',
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RequestsRoute = RequestsRouteImport.update({
-  id: '/requests',
-  path: '/requests',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PipelineRoute = PipelineRouteImport.update({
-  id: '/pipeline',
-  path: '/pipeline',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ParentsRoute = ParentsRouteImport.update({
-  id: '/parents',
-  path: '/parents',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MatchingRoute = MatchingRouteImport.update({
-  id: '/matching',
-  path: '/matching',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InterviewsRoute = InterviewsRouteImport.update({
-  id: '/interviews',
-  path: '/interviews',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContractsRoute = ContractsRouteImport.update({
-  id: '/contracts',
-  path: '/contracts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BabysittersRoute = BabysittersRouteImport.update({
-  id: '/babysitters',
-  path: '/babysitters',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AlertsRoute = AlertsRouteImport.update({
-  id: '/alerts',
-  path: '/alerts',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -70,159 +43,241 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParentProfileSetupRoute = ParentProfileSetupRouteImport.update({
+  id: '/parent/profile-setup',
+  path: '/parent/profile-setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParentMatchesRoute = ParentMatchesRouteImport.update({
+  id: '/parent/matches',
+  path: '/parent/matches',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BabysitterProfileSetupRoute = BabysitterProfileSetupRouteImport.update({
+  id: '/babysitter/profile-setup',
+  path: '/babysitter/profile-setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BabysitterDashboardRoute = BabysitterDashboardRouteImport.update({
+  id: '/babysitter/dashboard',
+  path: '/babysitter/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminReservationsRoute = AdminReservationsRouteImport.update({
+  id: '/admin/reservations',
+  path: '/admin/reservations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRequestsRoute = AdminRequestsRouteImport.update({
+  id: '/admin/requests',
+  path: '/admin/requests',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPipelineRoute = AdminPipelineRouteImport.update({
+  id: '/admin/pipeline',
+  path: '/admin/pipeline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminParentsRoute = AdminParentsRouteImport.update({
+  id: '/admin/parents',
+  path: '/admin/parents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMatchingRoute = AdminMatchingRouteImport.update({
+  id: '/admin/matching',
+  path: '/admin/matching',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminInterviewsRoute = AdminInterviewsRouteImport.update({
+  id: '/admin/interviews',
+  path: '/admin/interviews',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminContractsRoute = AdminContractsRouteImport.update({
+  id: '/admin/contracts',
+  path: '/admin/contracts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBabysittersRoute = AdminBabysittersRouteImport.update({
+  id: '/admin/babysitters',
+  path: '/admin/babysitters',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAlertsRoute = AdminAlertsRouteImport.update({
+  id: '/admin/alerts',
+  path: '/admin/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParentBabysitterIdRoute = ParentBabysitterIdRouteImport.update({
+  id: '/parent/babysitter/$id',
+  path: '/parent/babysitter/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/alerts': typeof AlertsRoute
-  '/babysitters': typeof BabysittersRoute
-  '/contracts': typeof ContractsRoute
-  '/interviews': typeof InterviewsRoute
-  '/matching': typeof MatchingRoute
-  '/parents': typeof ParentsRoute
-  '/pipeline': typeof PipelineRoute
-  '/requests': typeof RequestsRoute
-  '/reservations': typeof ReservationsRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/admin/alerts': typeof AdminAlertsRoute
+  '/admin/babysitters': typeof AdminBabysittersRoute
+  '/admin/contracts': typeof AdminContractsRoute
+  '/admin/interviews': typeof AdminInterviewsRoute
+  '/admin/matching': typeof AdminMatchingRoute
+  '/admin/parents': typeof AdminParentsRoute
+  '/admin/pipeline': typeof AdminPipelineRoute
+  '/admin/requests': typeof AdminRequestsRoute
+  '/admin/reservations': typeof AdminReservationsRoute
+  '/babysitter/dashboard': typeof BabysitterDashboardRoute
+  '/babysitter/profile-setup': typeof BabysitterProfileSetupRoute
+  '/parent/matches': typeof ParentMatchesRoute
+  '/parent/profile-setup': typeof ParentProfileSetupRoute
+  '/admin/': typeof AdminIndexRoute
+  '/parent/babysitter/$id': typeof ParentBabysitterIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/alerts': typeof AlertsRoute
-  '/babysitters': typeof BabysittersRoute
-  '/contracts': typeof ContractsRoute
-  '/interviews': typeof InterviewsRoute
-  '/matching': typeof MatchingRoute
-  '/parents': typeof ParentsRoute
-  '/pipeline': typeof PipelineRoute
-  '/requests': typeof RequestsRoute
-  '/reservations': typeof ReservationsRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/admin/alerts': typeof AdminAlertsRoute
+  '/admin/babysitters': typeof AdminBabysittersRoute
+  '/admin/contracts': typeof AdminContractsRoute
+  '/admin/interviews': typeof AdminInterviewsRoute
+  '/admin/matching': typeof AdminMatchingRoute
+  '/admin/parents': typeof AdminParentsRoute
+  '/admin/pipeline': typeof AdminPipelineRoute
+  '/admin/requests': typeof AdminRequestsRoute
+  '/admin/reservations': typeof AdminReservationsRoute
+  '/babysitter/dashboard': typeof BabysitterDashboardRoute
+  '/babysitter/profile-setup': typeof BabysitterProfileSetupRoute
+  '/parent/matches': typeof ParentMatchesRoute
+  '/parent/profile-setup': typeof ParentProfileSetupRoute
+  '/admin': typeof AdminIndexRoute
+  '/parent/babysitter/$id': typeof ParentBabysitterIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/alerts': typeof AlertsRoute
-  '/babysitters': typeof BabysittersRoute
-  '/contracts': typeof ContractsRoute
-  '/interviews': typeof InterviewsRoute
-  '/matching': typeof MatchingRoute
-  '/parents': typeof ParentsRoute
-  '/pipeline': typeof PipelineRoute
-  '/requests': typeof RequestsRoute
-  '/reservations': typeof ReservationsRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/admin/alerts': typeof AdminAlertsRoute
+  '/admin/babysitters': typeof AdminBabysittersRoute
+  '/admin/contracts': typeof AdminContractsRoute
+  '/admin/interviews': typeof AdminInterviewsRoute
+  '/admin/matching': typeof AdminMatchingRoute
+  '/admin/parents': typeof AdminParentsRoute
+  '/admin/pipeline': typeof AdminPipelineRoute
+  '/admin/requests': typeof AdminRequestsRoute
+  '/admin/reservations': typeof AdminReservationsRoute
+  '/babysitter/dashboard': typeof BabysitterDashboardRoute
+  '/babysitter/profile-setup': typeof BabysitterProfileSetupRoute
+  '/parent/matches': typeof ParentMatchesRoute
+  '/parent/profile-setup': typeof ParentProfileSetupRoute
+  '/admin/': typeof AdminIndexRoute
+  '/parent/babysitter/$id': typeof ParentBabysitterIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/alerts'
-    | '/babysitters'
-    | '/contracts'
-    | '/interviews'
-    | '/matching'
-    | '/parents'
-    | '/pipeline'
-    | '/requests'
-    | '/reservations'
+    | '/login'
+    | '/signup'
+    | '/admin/alerts'
+    | '/admin/babysitters'
+    | '/admin/contracts'
+    | '/admin/interviews'
+    | '/admin/matching'
+    | '/admin/parents'
+    | '/admin/pipeline'
+    | '/admin/requests'
+    | '/admin/reservations'
+    | '/babysitter/dashboard'
+    | '/babysitter/profile-setup'
+    | '/parent/matches'
+    | '/parent/profile-setup'
+    | '/admin/'
+    | '/parent/babysitter/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/alerts'
-    | '/babysitters'
-    | '/contracts'
-    | '/interviews'
-    | '/matching'
-    | '/parents'
-    | '/pipeline'
-    | '/requests'
-    | '/reservations'
+    | '/login'
+    | '/signup'
+    | '/admin/alerts'
+    | '/admin/babysitters'
+    | '/admin/contracts'
+    | '/admin/interviews'
+    | '/admin/matching'
+    | '/admin/parents'
+    | '/admin/pipeline'
+    | '/admin/requests'
+    | '/admin/reservations'
+    | '/babysitter/dashboard'
+    | '/babysitter/profile-setup'
+    | '/parent/matches'
+    | '/parent/profile-setup'
+    | '/admin'
+    | '/parent/babysitter/$id'
   id:
     | '__root__'
     | '/'
-    | '/alerts'
-    | '/babysitters'
-    | '/contracts'
-    | '/interviews'
-    | '/matching'
-    | '/parents'
-    | '/pipeline'
-    | '/requests'
-    | '/reservations'
+    | '/login'
+    | '/signup'
+    | '/admin/alerts'
+    | '/admin/babysitters'
+    | '/admin/contracts'
+    | '/admin/interviews'
+    | '/admin/matching'
+    | '/admin/parents'
+    | '/admin/pipeline'
+    | '/admin/requests'
+    | '/admin/reservations'
+    | '/babysitter/dashboard'
+    | '/babysitter/profile-setup'
+    | '/parent/matches'
+    | '/parent/profile-setup'
+    | '/admin/'
+    | '/parent/babysitter/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AlertsRoute: typeof AlertsRoute
-  BabysittersRoute: typeof BabysittersRoute
-  ContractsRoute: typeof ContractsRoute
-  InterviewsRoute: typeof InterviewsRoute
-  MatchingRoute: typeof MatchingRoute
-  ParentsRoute: typeof ParentsRoute
-  PipelineRoute: typeof PipelineRoute
-  RequestsRoute: typeof RequestsRoute
-  ReservationsRoute: typeof ReservationsRoute
+  LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
+  AdminAlertsRoute: typeof AdminAlertsRoute
+  AdminBabysittersRoute: typeof AdminBabysittersRoute
+  AdminContractsRoute: typeof AdminContractsRoute
+  AdminInterviewsRoute: typeof AdminInterviewsRoute
+  AdminMatchingRoute: typeof AdminMatchingRoute
+  AdminParentsRoute: typeof AdminParentsRoute
+  AdminPipelineRoute: typeof AdminPipelineRoute
+  AdminRequestsRoute: typeof AdminRequestsRoute
+  AdminReservationsRoute: typeof AdminReservationsRoute
+  BabysitterDashboardRoute: typeof BabysitterDashboardRoute
+  BabysitterProfileSetupRoute: typeof BabysitterProfileSetupRoute
+  ParentMatchesRoute: typeof ParentMatchesRoute
+  ParentProfileSetupRoute: typeof ParentProfileSetupRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  ParentBabysitterIdRoute: typeof ParentBabysitterIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/reservations': {
-      id: '/reservations'
-      path: '/reservations'
-      fullPath: '/reservations'
-      preLoaderRoute: typeof ReservationsRouteImport
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/requests': {
-      id: '/requests'
-      path: '/requests'
-      fullPath: '/requests'
-      preLoaderRoute: typeof RequestsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pipeline': {
-      id: '/pipeline'
-      path: '/pipeline'
-      fullPath: '/pipeline'
-      preLoaderRoute: typeof PipelineRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/parents': {
-      id: '/parents'
-      path: '/parents'
-      fullPath: '/parents'
-      preLoaderRoute: typeof ParentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/matching': {
-      id: '/matching'
-      path: '/matching'
-      fullPath: '/matching'
-      preLoaderRoute: typeof MatchingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/interviews': {
-      id: '/interviews'
-      path: '/interviews'
-      fullPath: '/interviews'
-      preLoaderRoute: typeof InterviewsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contracts': {
-      id: '/contracts'
-      path: '/contracts'
-      fullPath: '/contracts'
-      preLoaderRoute: typeof ContractsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/babysitters': {
-      id: '/babysitters'
-      path: '/babysitters'
-      fullPath: '/babysitters'
-      preLoaderRoute: typeof BabysittersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/alerts': {
-      id: '/alerts'
-      path: '/alerts'
-      fullPath: '/alerts'
-      preLoaderRoute: typeof AlertsRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -232,20 +287,133 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parent/profile-setup': {
+      id: '/parent/profile-setup'
+      path: '/parent/profile-setup'
+      fullPath: '/parent/profile-setup'
+      preLoaderRoute: typeof ParentProfileSetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parent/matches': {
+      id: '/parent/matches'
+      path: '/parent/matches'
+      fullPath: '/parent/matches'
+      preLoaderRoute: typeof ParentMatchesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/babysitter/profile-setup': {
+      id: '/babysitter/profile-setup'
+      path: '/babysitter/profile-setup'
+      fullPath: '/babysitter/profile-setup'
+      preLoaderRoute: typeof BabysitterProfileSetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/babysitter/dashboard': {
+      id: '/babysitter/dashboard'
+      path: '/babysitter/dashboard'
+      fullPath: '/babysitter/dashboard'
+      preLoaderRoute: typeof BabysitterDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reservations': {
+      id: '/admin/reservations'
+      path: '/admin/reservations'
+      fullPath: '/admin/reservations'
+      preLoaderRoute: typeof AdminReservationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/requests': {
+      id: '/admin/requests'
+      path: '/admin/requests'
+      fullPath: '/admin/requests'
+      preLoaderRoute: typeof AdminRequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/pipeline': {
+      id: '/admin/pipeline'
+      path: '/admin/pipeline'
+      fullPath: '/admin/pipeline'
+      preLoaderRoute: typeof AdminPipelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/parents': {
+      id: '/admin/parents'
+      path: '/admin/parents'
+      fullPath: '/admin/parents'
+      preLoaderRoute: typeof AdminParentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/matching': {
+      id: '/admin/matching'
+      path: '/admin/matching'
+      fullPath: '/admin/matching'
+      preLoaderRoute: typeof AdminMatchingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/interviews': {
+      id: '/admin/interviews'
+      path: '/admin/interviews'
+      fullPath: '/admin/interviews'
+      preLoaderRoute: typeof AdminInterviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/contracts': {
+      id: '/admin/contracts'
+      path: '/admin/contracts'
+      fullPath: '/admin/contracts'
+      preLoaderRoute: typeof AdminContractsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/babysitters': {
+      id: '/admin/babysitters'
+      path: '/admin/babysitters'
+      fullPath: '/admin/babysitters'
+      preLoaderRoute: typeof AdminBabysittersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/alerts': {
+      id: '/admin/alerts'
+      path: '/admin/alerts'
+      fullPath: '/admin/alerts'
+      preLoaderRoute: typeof AdminAlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parent/babysitter/$id': {
+      id: '/parent/babysitter/$id'
+      path: '/parent/babysitter/$id'
+      fullPath: '/parent/babysitter/$id'
+      preLoaderRoute: typeof ParentBabysitterIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AlertsRoute: AlertsRoute,
-  BabysittersRoute: BabysittersRoute,
-  ContractsRoute: ContractsRoute,
-  InterviewsRoute: InterviewsRoute,
-  MatchingRoute: MatchingRoute,
-  ParentsRoute: ParentsRoute,
-  PipelineRoute: PipelineRoute,
-  RequestsRoute: RequestsRoute,
-  ReservationsRoute: ReservationsRoute,
+  LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
+  AdminAlertsRoute: AdminAlertsRoute,
+  AdminBabysittersRoute: AdminBabysittersRoute,
+  AdminContractsRoute: AdminContractsRoute,
+  AdminInterviewsRoute: AdminInterviewsRoute,
+  AdminMatchingRoute: AdminMatchingRoute,
+  AdminParentsRoute: AdminParentsRoute,
+  AdminPipelineRoute: AdminPipelineRoute,
+  AdminRequestsRoute: AdminRequestsRoute,
+  AdminReservationsRoute: AdminReservationsRoute,
+  BabysitterDashboardRoute: BabysitterDashboardRoute,
+  BabysitterProfileSetupRoute: BabysitterProfileSetupRoute,
+  ParentMatchesRoute: ParentMatchesRoute,
+  ParentProfileSetupRoute: ParentProfileSetupRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  ParentBabysitterIdRoute: ParentBabysitterIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

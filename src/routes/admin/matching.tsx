@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/matching")({
+export const Route = createFileRoute("/admin/matching")({
   head: () => ({ meta: [{ title: "Matching — Kiddobee Admin" }] }),
   component: MatchingPage,
 });
@@ -21,49 +21,27 @@ function MatchingPage() {
   const { t } = useI18n();
   const qc = useQueryClient();
   const [parentId, setParentId] = useState<string>("");
-
   const allMatches = useQuery({ queryKey: ["matches", "all"], queryFn: fetchAllMatches });
   const parents = useMemo(() => {
     const map = new Map<string, string>();
-    (allMatches.data ?? []).forEach((m) => {
-      if (!map.has(m.parent_id)) map.set(m.parent_id, m.parent_name ?? m.parent_id);
-    });
+    (allMatches.data ?? []).forEach((m) => { if (!map.has(m.parent_id)) map.set(m.parent_id, m.parent_name ?? m.parent_id); });
     return Array.from(map.entries()).sort((a, b) => a[1].localeCompare(b[1]));
   }, [allMatches.data]);
-
-  const matches = useQuery({
-    queryKey: ["matches", "parent", parentId],
-    queryFn: () => fetchMatchesForParent(parentId),
-    enabled: Boolean(parentId),
-  });
-
+  const matches = useQuery({ queryKey: ["matches", "parent", parentId], queryFn: () => fetchMatchesForParent(parentId), enabled: Boolean(parentId) });
   const recalc = useMutation({
     mutationFn: recalculateMatches,
-    onSuccess: () => {
-      toast.success("Scores recalculated");
-      qc.invalidateQueries({ queryKey: ["matches"] });
-    },
+    onSuccess: () => { toast.success("Scores recalculated"); qc.invalidateQueries({ queryKey: ["matches"] }); },
     onError: () => toast.error("Recalculation failed"),
   });
-
-  const ranked = useMemo(
-    () => [...(matches.data ?? [])].sort((a, b) => b.final_score - a.final_score),
-    [matches.data],
-  );
-
+  const ranked = useMemo(() => [...(matches.data ?? [])].sort((a, b) => b.final_score - a.final_score), [matches.data]);
   return (
     <div>
-      <PageHeader
-        title={t("matchingWorkbench")}
-        subtitle={t("matchingSubtitle")}
-        actions={
-          <Button onClick={() => recalc.mutate()} disabled={recalc.isPending}>
-            {recalc.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
-            {recalc.isPending ? t("recalculating") : t("recalculate")}
-          </Button>
-        }
-      />
-
+      <PageHeader title={t("matchingWorkbench")} subtitle={t("matchingSubtitle")} actions={
+        <Button onClick={() => recalc.mutate()} disabled={recalc.isPending}>
+          {recalc.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+          {recalc.isPending ? t("recalculating") : t("recalculate")}
+        </Button>
+      } />
       <Card className="p-4 mb-6">
         <div className="max-w-sm">
           <Select value={parentId} onValueChange={setParentId}>
@@ -76,14 +54,7 @@ function MatchingPage() {
           </Select>
         </div>
       </Card>
-
-      {!parentId ? (
-        <EmptyState message={t("noParentSelected")} />
-      ) : matches.isLoading ? (
-        <LoadingState />
-      ) : ranked.length === 0 ? (
-        <EmptyState />
-      ) : (
+      {!parentId ? <EmptyState message={t("noParentSelected")} /> : matches.isLoading ? <LoadingState /> : ranked.length === 0 ? <EmptyState /> : (
         <Card className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -92,14 +63,9 @@ function MatchingPage() {
                 <TableHead>{t("babysitter")}</TableHead>
                 <TableHead>{t("score")} /100</TableHead>
                 <TableHead>{t("tier")}</TableHead>
-                <TableHead>Lang/30</TableHead>
-                <TableHead>Exp/25</TableHead>
-                <TableHead>Rat/30</TableHead>
-                <TableHead>Miss/25</TableHead>
-                <TableHead>Pers/30</TableHead>
-                <TableHead>Age/30</TableHead>
-                <TableHead>Prox/20</TableHead>
-                <TableHead>Misc/20</TableHead>
+                <TableHead>Lang/30</TableHead><TableHead>Exp/25</TableHead><TableHead>Rat/30</TableHead>
+                <TableHead>Miss/25</TableHead><TableHead>Pers/30</TableHead><TableHead>Age/30</TableHead>
+                <TableHead>Prox/20</TableHead><TableHead>Misc/20</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -108,9 +74,7 @@ function MatchingPage() {
                   <TableCell className="font-bold text-muted-foreground tabular-nums">{i + 1}</TableCell>
                   <TableCell className="font-medium">{m.sitter_name}</TableCell>
                   <TableCell className="text-xl font-bold tabular-nums">{m.final_score}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className={tierBadgeClass(m.tier)}>{m.tier}</Badge>
-                  </TableCell>
+                  <TableCell><Badge variant="outline" className={tierBadgeClass(m.tier)}>{m.tier}</Badge></TableCell>
                   <TableCell className="tabular-nums">{m.lang_score}</TableCell>
                   <TableCell className="tabular-nums">{m.experience_score}</TableCell>
                   <TableCell className="tabular-nums">{m.ratings_score}</TableCell>
