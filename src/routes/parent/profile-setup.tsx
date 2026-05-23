@@ -1,7 +1,8 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { PARIS_METRO_STATIONS } from "@/lib/auth";
+import { useAuth, signOut, PARIS_METRO_STATIONS } from "@/lib/auth";
+import { LanguageToggle } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, ChevronRight, ChevronLeft } from "lucide-react";
+import { Loader2, ChevronRight, ChevronLeft, LogOut, LayoutGrid, User } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/parent/profile-setup")({
@@ -193,11 +194,50 @@ function ParentProfileSetup() {
     </div>
   );
 
+  const { user } = useAuth();
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#00B4D8]/5 to-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-[#00B4D8]/5 to-white">
+      {/* Navbar */}
+      <header className="bg-white border-b w-full sticky top-0 z-10">
+        <div className="px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2 shrink-0">
+            <img src="/logo.avif" alt="Kiddobee" className="h-8 w-auto object-contain" />
+            <span className="bg-[#00B4D8] text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">Parent</span>
+          </div>
+          <nav className="flex items-center gap-1">
+            <Link to="/parent/matches">
+              {({ isActive }) => (
+                <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8] text-white" : "text-gray-600 hover:bg-gray-100"}`}>
+                  <LayoutGrid className="h-4 w-4" />
+                  Dashboard
+                </span>
+              )}
+            </Link>
+            <Link to="/parent/profile-setup">
+              {({ isActive }) => (
+                <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8] text-white" : "text-gray-600 hover:bg-gray-100"}`}>
+                  <User className="h-4 w-4" />
+                  Profile
+                </span>
+              )}
+            </Link>
+          </nav>
+          <div className="flex items-center gap-2 shrink-0">
+            <LanguageToggle />
+            <button
+              onClick={() => signOut().then(() => navigate({ to: "/login" }))}
+              className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 transition-colors"
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="flex items-center justify-center p-4 py-8">
       <div className="w-full max-w-2xl">
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#00B4D8] text-white text-xl font-bold mb-3">K</div>
           <h1 className="text-xl font-bold text-gray-900">Complete your profile</h1>
         </div>
 
@@ -401,6 +441,7 @@ function ParentProfileSetup() {
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
