@@ -43,13 +43,13 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="px-4 py-5 border-b">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">K</div>
-          <div className="flex flex-col leading-tight group-data-[collapsible=icon]:hidden">
-            <span className="font-bold text-sidebar-foreground">Kiddobee</span>
-            <span className="text-xs text-sidebar-foreground/60">Admin</span>
-          </div>
+      <SidebarHeader className="px-3 py-4 border-b">
+        <div className="flex items-center">
+          <img
+            src="/logo.avif"
+            alt="Kiddobee"
+            className="h-12 w-auto object-contain group-data-[collapsible=icon]:h-9 group-data-[collapsible=icon]:w-9"
+          />
         </div>
       </SidebarHeader>
       <SidebarContent>

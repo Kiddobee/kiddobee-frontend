@@ -35,10 +35,12 @@ function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-[#00B4D8]/10 to-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#00B4D8] text-white text-2xl font-bold mb-4 shadow-lg">K</div>
-          <h1 className="text-2xl font-bold text-gray-900">Kiddobee</h1>
-          <p className="text-sm text-gray-500 mt-1">Paris babysitting platform</p>
+        <div className="flex items-center gap-3 mb-8">
+          <img src="/logo.avif" alt="Kiddobee" className="w-16 h-16 object-contain" />
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Kiddobee</h1>
+            <p className="text-sm text-gray-500">Paris babysitting platform</p>
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border p-8">
