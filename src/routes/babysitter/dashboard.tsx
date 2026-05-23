@@ -7,7 +7,7 @@ import { LanguageToggle } from "@/lib/i18n";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { LogOut, Clock } from "lucide-react";
+import { LogOut, Clock, LayoutGrid, User } from "lucide-react";
 
 export const Route = createFileRoute("/babysitter/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Kiddobee" }] }),
@@ -70,28 +70,25 @@ function BabysitterDashboard() {
   return (
     <div className="min-h-screen bg-[#F3F4F6]">
       {/* Navbar */}
-      <header className="bg-black sticky top-0 z-10">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="w-9 h-9 rounded-full bg-[#00B4D8] flex items-center justify-center text-white font-bold text-sm shrink-0">
-              {displayFirstName.charAt(0).toUpperCase()}
-            </div>
-            <div className="leading-tight">
-              <p className="text-white font-semibold text-sm leading-none">Kiddobee</p>
-              <p className="text-gray-400 text-xs mt-0.5">Babysitter</p>
-            </div>
+      <header className="bg-white border-b w-full sticky top-0 z-10">
+        <div className="px-6 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2 shrink-0">
+            <img src="/logo.avif" alt="Kiddobee" className="h-8 w-auto object-contain" />
+            <span className="bg-[#00B4D8] text-white text-xs font-semibold px-2.5 py-0.5 rounded-full">Babysitter</span>
           </div>
           <nav className="flex items-center gap-1">
             <Link to="/babysitter/dashboard">
               {({ isActive }) => (
-                <span className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8] text-white" : "text-gray-400 hover:text-white"}`}>
+                <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8] text-white" : "text-gray-600 hover:bg-gray-100"}`}>
+                  <LayoutGrid className="h-4 w-4" />
                   Dashboard
                 </span>
               )}
             </Link>
             <Link to="/babysitter/profile-setup">
               {({ isActive }) => (
-                <span className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8] text-white" : "text-gray-400 hover:text-white"}`}>
+                <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8] text-white" : "text-gray-600 hover:bg-gray-100"}`}>
+                  <User className="h-4 w-4" />
                   Profile
                 </span>
               )}
@@ -101,7 +98,7 @@ function BabysitterDashboard() {
             <LanguageToggle />
             <button
               onClick={() => signOut().then(() => navigate({ to: "/login" }))}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-white transition-colors"
+              className="p-1.5 rounded-lg text-gray-500 hover:text-gray-900 transition-colors"
             >
               <LogOut className="h-4 w-4" />
             </button>
