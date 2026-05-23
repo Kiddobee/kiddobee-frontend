@@ -165,7 +165,7 @@ function BabysitterProfileSetup() {
       if (langs.length > 0) setLanguages(langs);
     }
 
-    load();
+    load().catch(() => setDataLoading(false));
   }, []);
 
   // Per-step save helpers
@@ -282,8 +282,48 @@ function BabysitterProfileSetup() {
 
   if (dataLoading) {
     return (
-      <div className="min-h-screen bg-[#F3F4F6] flex items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-[#00B4D8]" />
+      <div className="min-h-screen bg-[#F3F4F6]">
+        <header className="bg-black sticky top-0 z-10">
+          <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 shrink-0">
+              <div className="w-9 h-9 rounded-full bg-[#00B4D8] flex items-center justify-center text-white font-bold text-sm shrink-0">
+                {displayFirstName.charAt(0).toUpperCase()}
+              </div>
+              <div className="leading-tight">
+                <p className="text-white font-semibold text-sm leading-none">Kiddobee</p>
+                <p className="text-gray-400 text-xs mt-0.5">Babysitter</p>
+              </div>
+            </div>
+            <nav className="flex items-center gap-1">
+              <Link to="/babysitter/dashboard">
+                {({ isActive }) => (
+                  <span className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8] text-white" : "text-gray-400 hover:text-white"}`}>
+                    Dashboard
+                  </span>
+                )}
+              </Link>
+              <Link to="/babysitter/profile-setup">
+                {({ isActive }) => (
+                  <span className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${isActive ? "bg-[#00B4D8] text-white" : "text-gray-400 hover:text-white"}`}>
+                    Profile
+                  </span>
+                )}
+              </Link>
+            </nav>
+            <div className="flex items-center gap-2 shrink-0">
+              <LanguageToggle />
+              <button
+                onClick={() => signOut().then(() => navigate({ to: "/login" }))}
+                className="p-1.5 rounded-lg text-gray-400 hover:text-white transition-colors"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        </header>
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-[#00B4D8]" />
+        </div>
       </div>
     );
   }
