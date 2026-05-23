@@ -24,7 +24,21 @@ function LoginPage() {
     setLoading(true);
     const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (authError) { setError(authError.message); return; }
+    if (authError) {
+      const code = (authError as any).code ?? authError.message;
+      if (code === "invalid_credentials" || authError.message.includes("Invalid login credentials")) {
+        setError("Incorrect email or password. Double-check and try again.");
+      } else if (code === "email_not_confirmed" || authError.message.includes("Email not confirmed")) {
+        setError("Email not confirmed. Contact support or check your inbox.");
+      } else if (code === "user_not_found") {
+        setError("No account found with this email.");
+      } else if (code === "too_many_requests") {
+        setError("Too many attempts. Please wait a few minutes and try again.");
+      } else {
+        setError(authError.message);
+      }
+      return;
+    }
     const role = data.user?.user_metadata?.role;
     if (role === "parent") navigate({ to: "/parent/matches" });
     else if (role === "babysitter") navigate({ to: "/babysitter/dashboard" });
