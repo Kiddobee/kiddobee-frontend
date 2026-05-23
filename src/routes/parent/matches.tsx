@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { LogOut, LayoutGrid, User, ChevronDown, ChevronUp, Video } from "lucide-react";
+import { LogOut, LayoutGrid, User, ChevronDown, ChevronUp, Video, AlertCircle, X } from "lucide-react";
 
 export const Route = createFileRoute("/parent/matches")({
   head: () => ({ meta: [{ title: "My Matches — Kiddobee" }] }),
@@ -30,6 +30,21 @@ function tierEmoji(tier: string): string {
   if (tier.includes("Good")) return "✅";
   if (tier.includes("Partial")) return "⚠️";
   return "";
+}
+
+function profileCompletion(parent: any): number {
+  const checks = [
+    !!(parent?.["Location (Arrondissement / City)"]),
+    !!(parent?.["Phone Number"]),
+    !!(parent?.["Number of Children"]),
+    !!(parent?.["Children's Ages"]),
+    !!(parent?.["Missions Required"]),
+    !!(parent?.["Language Required"]),
+    !!(parent?.["Age Range of Children (for matching)"]),
+    !!(parent?.["Schedule Type"]),
+    !!(["active", "verified"].includes(String(parent?.["Profile Status"] ?? "").toLowerCase())),
+  ];
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 }
 
 function isProfileComplete(parent: any): boolean {
@@ -307,6 +322,7 @@ function InterviewCard({ interview }: { interview: any }) {
 function ParentMatchesPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const [showBanner, setShowBanner] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
@@ -325,6 +341,7 @@ function ParentMatchesPage() {
   });
 
   const profileComplete = parent ? isProfileComplete(parent) : false;
+  const completion = parent ? profileCompletion(parent) : 0;
 
   const { data: matches, isLoading: matchesLoading } = useQuery({
     queryKey: ["parent-matches", parentId],
@@ -398,6 +415,34 @@ function ParentMatchesPage() {
           </div>
         </div>
       </header>
+
+      {showBanner && !parentLoading && completion < 100 && (
+        <div className="border-l-4 border-amber-400 bg-[#FEF9C3] px-4 py-4">
+          <div className="max-w-3xl mx-auto flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-amber-800 text-sm">Incomplete profile</p>
+              <p className="text-amber-700 text-sm mt-0.5">
+                Complete your profile to receive recommendations from babysitters selected by Kiddobee, based on your family's needs.
+              </p>
+              <div className="mt-3 space-y-1.5">
+                <p className="text-xs font-medium text-amber-700">Profile {completion}% complete</p>
+                <div className="h-1.5 w-full bg-amber-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-[#00B4D8] rounded-full transition-all" style={{ width: `${completion}%` }} />
+                </div>
+              </div>
+              <Link to="/parent/profile-setup">
+                <button className="mt-3 bg-[#D97706] hover:bg-[#B45309] text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors">
+                  Complete my profile
+                </button>
+              </Link>
+            </div>
+            <button onClick={() => setShowBanner(false)} className="p-1 rounded text-amber-500 hover:text-amber-700 hover:bg-amber-100 transition-colors flex-shrink-0">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-10">
         {/* SECTION 1: Matches */}
