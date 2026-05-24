@@ -7,12 +7,9 @@ import { fetchMatchesForParent, tierBadgeClass, type Match } from "@/lib/api";
 import { LanguageToggle } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { LogOut, LayoutGrid, User, ChevronDown, ChevronUp, Video, AlertCircle, Plus, X } from "lucide-react";
+import { LogOut, LayoutGrid, User, ChevronDown, ChevronUp, Video, AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/parent/matches")({
   head: () => ({ meta: [{ title: "My Matches — Kiddobee" }] }),
@@ -63,10 +60,90 @@ function statusColor(status: string): string {
   return "bg-gray-100 text-gray-600 border-gray-200";
 }
 
+const SLOT_HOURS = Array.from({ length: 12 }, (_, i) => i + 8); // 08:00 – 20:00
+
+const NEXT_7_DAYS = Array.from({ length: 7 }, (_, i) => {
+  const d = new Date();
+  d.setDate(d.getDate() + i + 1);
+  return d.toISOString().split("T")[0];
+});
+
+function formatSlot(h: number) {
+  return `${String(h).padStart(2, "0")}:00–${String(h + 1).padStart(2, "0")}:00`;
+}
+
+function formatDayLabel(dateStr: string) {
+  return new Date(dateStr + "T12:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+}
+
+function SlotPicker({ sitterId, excludeId, onBook }: { sitterId: string; excludeId?: string; onBook: (h: number, date: string) => void }) {
+  const [date, setDate] = useState("");
+  const [bookingH, setBookingH] = useState<number | null>(null);
+
+  const { data: bookedHours = [] } = useQuery({
+    queryKey: ["booked-slots", sitterId, date, excludeId],
+    queryFn: async () => {
+      let q = supabase
+        .from("Interview")
+        .select("scheduledAt")
+        .eq("babysitter_id", sitterId)
+        .neq("status", "cancelled")
+        .gte("scheduledAt", `${date}T00:00:00.000Z`)
+        .lte("scheduledAt", `${date}T23:59:59.999Z`);
+      if (excludeId) q = q.neq("id", excludeId);
+      const { data } = await q;
+      return (data ?? []).map((r: any) => new Date(r.scheduledAt).getHours());
+    },
+    enabled: Boolean(date),
+  });
+
+  async function pick(h: number) {
+    setBookingH(h);
+    await onBook(h, date);
+    setBookingH(null);
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Select date</p>
+      <div className="flex flex-wrap gap-1.5">
+        {NEXT_7_DAYS.map(d => (
+          <button key={d} onClick={() => { setDate(d); }}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${date === d ? "bg-[#00B4D8] border-[#00B4D8] text-white" : "border-gray-200 text-gray-600 hover:border-[#00B4D8]/50"}`}>
+            {formatDayLabel(d)}
+          </button>
+        ))}
+      </div>
+      {date && (
+        <>
+          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">Select time</p>
+          <div className="grid grid-cols-3 gap-1.5">
+            {SLOT_HOURS.map(h => {
+              const booked = bookedHours.includes(h);
+              const active = bookingH === h;
+              return (
+                <button key={h} disabled={booked || bookingH !== null} onClick={() => pick(h)}
+                  className={`py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                    booked ? "bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed"
+                    : active ? "bg-[#00B4D8] border-[#00B4D8] text-white"
+                    : "border-gray-200 text-gray-700 hover:border-[#00B4D8] hover:text-[#00B4D8]"
+                  }`}>
+                  {formatSlot(h)}
+                </button>
+              );
+            })}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function MatchCard({ match, parentId, rank }: { match: Match; parentId: string; rank: number }) {
   const [expanded, setExpanded] = useState(false);
-  const [requested, setRequested] = useState(false);
-  const [scheduling, setScheduling] = useState(false);
+  const [showSlotPicker, setShowSlotPicker] = useState(false);
+  const [scheduled, setScheduled] = useState(false);
+  const qc = useQueryClient();
 
   const top3 = [...SCORE_DIMS]
     .sort((a, b) => (match[b.key] as number) - (match[a.key] as number))
@@ -81,23 +158,24 @@ function MatchCard({ match, parentId, rank }: { match: Match; parentId: string; 
     enabled: expanded,
   });
 
-  async function scheduleInterview() {
-    setScheduling(true);
+  async function bookSlot(h: number, date: string) {
+    const scheduledAt = new Date(`${date}T${String(h).padStart(2, "0")}:00:00`).toISOString();
     try {
       const { error } = await supabase.from("Interview").insert({
         parent_id: parentId,
         babysitter_id: match.sitter_id,
         babysitter_name: match.sitter_name,
-        status: "requested",
+        status: "scheduled",
+        scheduledAt,
         created_at: new Date().toISOString(),
       });
       if (error) throw error;
-      setRequested(true);
-      toast.success("Interview requested! Our team will be in touch.");
+      setScheduled(true);
+      setShowSlotPicker(false);
+      toast.success("Interview scheduled!");
+      qc.invalidateQueries({ queryKey: ["parent-interviews", parentId] });
     } catch (err: any) {
-      toast.error("Failed to request interview: " + err.message);
-    } finally {
-      setScheduling(false);
+      toast.error("Failed to schedule: " + err.message);
     }
   }
 
@@ -206,13 +284,25 @@ function MatchCard({ match, parentId, rank }: { match: Match; parentId: string; 
                   </div>
                 </div>
               )}
-              <Button
-                onClick={scheduleInterview}
-                disabled={requested || scheduling}
-                className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white"
-              >
-                {requested ? "Interview requested ✓" : scheduling ? "Sending request…" : "Schedule interview"}
-              </Button>
+              {scheduled ? (
+                <div className="w-full text-center py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg">
+                  Interview scheduled ✓
+                </div>
+              ) : (
+                <>
+                  <Button
+                    onClick={() => setShowSlotPicker(v => !v)}
+                    className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white"
+                  >
+                    {showSlotPicker ? "Cancel" : "Schedule interview"}
+                  </Button>
+                  {showSlotPicker && (
+                    <div className="mt-3">
+                      <SlotPicker sitterId={match.sitter_id} onBook={bookSlot} />
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
         </div>
@@ -266,12 +356,39 @@ function BookingCard({ contract }: { contract: any }) {
   );
 }
 
-function InterviewCard({ interview }: { interview: any }) {
+function InterviewCard({ interview, parentId }: { interview: any; parentId: string }) {
   const [expanded, setExpanded] = useState(false);
-  const name = interview.babysitter_name ?? interview.babysitterName ?? interview.candidateName ?? interview.candidate ?? "—";
+  const [showEdit, setShowEdit] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const qc = useQueryClient();
+
+  const name = interview.babysitter_name ?? interview.babysitterName ?? interview.candidateName ?? "—";
   const status = String(interview.status ?? "—");
-  const date = interview.scheduledAt ?? interview.scheduled_at ?? interview.scheduled ?? interview.created_at;
+  const date = interview.scheduledAt ?? interview.scheduled_at ?? interview.scheduled;
   const meetLink = interview.meet_link ?? interview.meetLink ?? null;
+  const isCancelled = status.toLowerCase() === "cancelled";
+
+  function refresh() {
+    qc.invalidateQueries({ queryKey: ["parent-interviews", parentId] });
+  }
+
+  async function cancelInterview() {
+    setCancelling(true);
+    const { error } = await supabase.from("Interview").update({ status: "cancelled" }).eq("id", interview.id);
+    setCancelling(false);
+    if (error) { toast.error("Failed to cancel"); return; }
+    toast.success("Interview cancelled");
+    refresh();
+  }
+
+  async function reschedule(h: number, newDate: string) {
+    const scheduledAt = new Date(`${newDate}T${String(h).padStart(2, "0")}:00:00`).toISOString();
+    const { error } = await supabase.from("Interview").update({ scheduledAt, status: "scheduled" }).eq("id", interview.id);
+    if (error) { toast.error("Failed to reschedule"); return; }
+    toast.success("Interview rescheduled!");
+    setShowEdit(false);
+    refresh();
+  }
 
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -285,7 +402,7 @@ function InterviewCard({ interview }: { interview: any }) {
           </div>
           <div className="min-w-0">
             <p className="font-medium text-gray-900 truncate">{name}</p>
-            {date && <p className="text-xs text-gray-400">{fmtDate(date, "en-GB")}</p>}
+            {date && <p className="text-xs text-gray-400">{new Date(date).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</p>}
           </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
@@ -298,24 +415,32 @@ function InterviewCard({ interview }: { interview: any }) {
           <div className="grid grid-cols-2 gap-3">
             <div><p className="text-xs text-gray-400 mb-0.5">Babysitter</p><p className="font-medium">{name}</p></div>
             <div><p className="text-xs text-gray-400 mb-0.5">Status</p><p className="font-medium">{status}</p></div>
-            {date && <div className="col-span-2"><p className="text-xs text-gray-400 mb-0.5">Requested on</p><p className="font-medium">{fmtDate(date, "en-GB")}</p></div>}
+            {date && <div className="col-span-2"><p className="text-xs text-gray-400 mb-0.5">Scheduled</p><p className="font-medium">{new Date(date).toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" })}</p></div>}
           </div>
-          <div>
-            <p className="text-xs text-gray-400 mb-1">Google Meet</p>
-            {meetLink ? (
-              <a
-                href={meetLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-[#00B4D8] font-medium hover:underline"
-              >
-                <Video className="h-4 w-4" />
-                Join meeting
-              </a>
-            ) : (
-              <p className="text-gray-500 italic">Link will be sent by our team</p>
-            )}
-          </div>
+          {meetLink ? (
+            <a href={meetLink} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-[#00B4D8] font-medium hover:underline">
+              <Video className="h-4 w-4" /> Join meeting
+            </a>
+          ) : (
+            <p className="text-xs text-gray-400 italic">Meet link will be added by the team</p>
+          )}
+          {!isCancelled && (
+            <div className="flex gap-2 pt-1">
+              <Button size="sm" variant="outline" onClick={() => setShowEdit(v => !v)} className="flex-1">
+                {showEdit ? "Close" : "Edit"}
+              </Button>
+              <Button size="sm" variant="outline" disabled={cancelling} onClick={cancelInterview}
+                className="flex-1 text-red-600 border-red-200 hover:bg-red-50">
+                {cancelling ? "Cancelling…" : "Cancel interview"}
+              </Button>
+            </div>
+          )}
+          {showEdit && (
+            <div className="pt-1">
+              <SlotPicker sitterId={interview.babysitter_id} excludeId={interview.id} onBook={reschedule} />
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -325,44 +450,11 @@ function InterviewCard({ interview }: { interview: any }) {
 function ParentMatchesPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
   }, [user, loading]);
 
   const parentId = user?.user_metadata?.profileId as string | undefined;
-
-  const [showInterviewForm, setShowInterviewForm] = useState(false);
-  const [newBabysitterName, setNewBabysitterName] = useState("");
-  const [newPreferredDate, setNewPreferredDate] = useState("");
-  const [newNotes, setNewNotes] = useState("");
-  const [addingInterview, setAddingInterview] = useState(false);
-
-  async function requestInterview() {
-    if (!parentId || !newBabysitterName.trim()) return;
-    setAddingInterview(true);
-    try {
-      const { error } = await supabase.from("Interview").insert({
-        parent_id: parentId,
-        babysitter_name: newBabysitterName.trim(),
-        status: "requested",
-        scheduledAt: newPreferredDate || null,
-        notes: newNotes || null,
-        created_at: new Date().toISOString(),
-      });
-      if (error) throw error;
-      toast.success("Interview requested! Our team will be in touch.");
-      setNewBabysitterName("");
-      setNewPreferredDate("");
-      setNewNotes("");
-      setShowInterviewForm(false);
-      queryClient.invalidateQueries({ queryKey: ["parent-interviews", parentId] });
-    } catch (err: any) {
-      toast.error("Failed to request interview: " + err.message);
-    } finally {
-      setAddingInterview(false);
-    }
-  }
 
   const { data: parent, isLoading: parentLoading } = useQuery({
     queryKey: ["parent-profile", parentId],
@@ -543,65 +635,16 @@ function ParentMatchesPage() {
 
         {/* SECTION 3: My Interviews */}
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-gray-900">My Interviews</h2>
-            <Button
-              size="sm"
-              onClick={() => setShowInterviewForm((v) => !v)}
-              className="bg-[#00B4D8] hover:bg-[#0096B4] text-white gap-1.5"
-            >
-              {showInterviewForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-              {showInterviewForm ? "Cancel" : "Request interview"}
-            </Button>
-          </div>
-
-          {showInterviewForm && (
-            <div className="bg-white rounded-xl border border-[#00B4D8]/30 shadow-sm p-5 mb-4 space-y-4">
-              <p className="text-sm font-semibold text-gray-800">New interview request</p>
-              <div className="space-y-1.5">
-                <Label>Babysitter name</Label>
-                <Input
-                  value={newBabysitterName}
-                  onChange={e => setNewBabysitterName(e.target.value)}
-                  placeholder="Name of the babysitter"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Preferred date & time</Label>
-                <Input
-                  type="datetime-local"
-                  value={newPreferredDate}
-                  onChange={e => setNewPreferredDate(e.target.value)}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Notes</Label>
-                <Textarea
-                  value={newNotes}
-                  onChange={e => setNewNotes(e.target.value)}
-                  placeholder="Any preferences or questions for the team…"
-                  rows={3}
-                />
-              </div>
-              <Button
-                onClick={requestInterview}
-                disabled={addingInterview || !newBabysitterName.trim()}
-                className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white"
-              >
-                {addingInterview ? "Sending…" : "Send request"}
-              </Button>
-            </div>
-          )}
-
+          <h2 className="text-lg font-bold text-gray-900 mb-4">My Interviews</h2>
           {interviewsLoading ? (
             <div className="space-y-3">{[1, 2].map((i) => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}</div>
           ) : !interviews || interviews.length === 0 ? (
             <div className="bg-white rounded-xl border p-6 text-center text-gray-400 shadow-sm">
-              No interviews scheduled yet.
+              No interviews scheduled yet. Use the "Schedule interview" button on a match above.
             </div>
           ) : (
             <div className="space-y-3">
-              {interviews.map((iv: any) => <InterviewCard key={iv.id} interview={iv} />)}
+              {interviews.map((iv: any) => <InterviewCard key={iv.id} interview={iv} parentId={parentId!} />)}
             </div>
           )}
         </section>

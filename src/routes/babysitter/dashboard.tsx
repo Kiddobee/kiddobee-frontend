@@ -7,7 +7,8 @@ import { LanguageToggle } from "@/lib/i18n";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { LogOut, Clock, LayoutGrid, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { LogOut, Clock, LayoutGrid, User, Video } from "lucide-react";
 
 export const Route = createFileRoute("/babysitter/dashboard")({
   head: () => ({ meta: [{ title: "Dashboard — Kiddobee" }] }),
@@ -47,6 +48,22 @@ function BabysitterDashboard() {
     },
     enabled: Boolean(sitterId),
   });
+
+  const { data: interviews } = useQuery({
+    queryKey: ["sitter-interviews", sitterId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("Interview")
+        .select("*")
+        .eq("babysitter_id", sitterId!)
+        .neq("status", "cancelled")
+        .order("scheduledAt", { ascending: true });
+      return data ?? [];
+    },
+    enabled: Boolean(sitterId),
+  });
+
+  const upcomingInterview = interviews?.[0] ?? null;
 
   const completion = sitter ? profileCompletion(sitter) : 0;
   const status = sitter?.["Profile Status"] ?? "Pending";
@@ -138,14 +155,44 @@ function BabysitterDashboard() {
             </Button>
           </div>
 
-          {/* Card 2: HR Interview */}
+          {/* Card 2: Interviews */}
           <div className="bg-white rounded-2xl shadow-sm p-5 flex flex-col gap-3">
-            <h3 className="font-semibold text-gray-900">HR Interview</h3>
-            <div className="flex items-center gap-2 text-sm">
-              <Clock className="h-4 w-4 text-gray-400 shrink-0" />
-              <span className="text-gray-600">Status: <span className="font-medium text-gray-800">Not scheduled</span></span>
-            </div>
-            <p className="text-xs text-gray-400">You'll be notified once your interview is booked by our team.</p>
+            <h3 className="font-semibold text-gray-900">Interviews</h3>
+            {!upcomingInterview ? (
+              <>
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="h-4 w-4 text-gray-400 shrink-0" />
+                  <span className="text-gray-600">Status: <span className="font-medium text-gray-800">Not scheduled</span></span>
+                </div>
+                <p className="text-xs text-gray-400">You'll be notified once a family schedules an interview with you.</p>
+              </>
+            ) : (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">With family</span>
+                  <Badge variant="outline" className="text-xs bg-blue-50 text-blue-600 border-blue-200">
+                    {upcomingInterview.status}
+                  </Badge>
+                </div>
+                {upcomingInterview.scheduledAt && (
+                  <p className="text-sm font-medium text-gray-900">
+                    {new Date(upcomingInterview.scheduledAt).toLocaleString("en-GB", { dateStyle: "long", timeStyle: "short" })}
+                  </p>
+                )}
+                {upcomingInterview.meet_link ? (
+                  <a
+                    href={upcomingInterview.meet_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm text-[#00B4D8] font-medium hover:underline"
+                  >
+                    <Video className="h-4 w-4" /> Join meeting
+                  </a>
+                ) : (
+                  <p className="text-xs text-gray-400 italic">Meet link will be added by the team</p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Card 3: Notifications */}
