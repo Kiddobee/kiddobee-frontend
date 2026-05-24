@@ -1,15 +1,18 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase, fmtDate } from "@/lib/supabase";
 import { useAuth, signOut } from "@/lib/auth";
 import { fetchMatchesForParent, tierBadgeClass, type Match } from "@/lib/api";
 import { LanguageToggle } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { LogOut, LayoutGrid, User, ChevronDown, ChevronUp, Video, AlertCircle } from "lucide-react";
+import { LogOut, LayoutGrid, User, ChevronDown, ChevronUp, Video, AlertCircle, Plus, X } from "lucide-react";
 
 export const Route = createFileRoute("/parent/matches")({
   head: () => ({ meta: [{ title: "My Matches — Kiddobee" }] }),
@@ -322,11 +325,44 @@ function InterviewCard({ interview }: { interview: any }) {
 function ParentMatchesPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/login" });
   }, [user, loading]);
 
   const parentId = user?.user_metadata?.profileId as string | undefined;
+
+  const [showInterviewForm, setShowInterviewForm] = useState(false);
+  const [newBabysitterName, setNewBabysitterName] = useState("");
+  const [newPreferredDate, setNewPreferredDate] = useState("");
+  const [newNotes, setNewNotes] = useState("");
+  const [addingInterview, setAddingInterview] = useState(false);
+
+  async function requestInterview() {
+    if (!parentId || !newBabysitterName.trim()) return;
+    setAddingInterview(true);
+    try {
+      const { error } = await supabase.from("Interview").insert({
+        parent_id: parentId,
+        babysitter_name: newBabysitterName.trim(),
+        status: "requested",
+        scheduledAt: newPreferredDate || null,
+        notes: newNotes || null,
+        created_at: new Date().toISOString(),
+      });
+      if (error) throw error;
+      toast.success("Interview requested! Our team will be in touch.");
+      setNewBabysitterName("");
+      setNewPreferredDate("");
+      setNewNotes("");
+      setShowInterviewForm(false);
+      queryClient.invalidateQueries({ queryKey: ["parent-interviews", parentId] });
+    } catch (err: any) {
+      toast.error("Failed to request interview: " + err.message);
+    } finally {
+      setAddingInterview(false);
+    }
+  }
 
   const { data: parent, isLoading: parentLoading } = useQuery({
     queryKey: ["parent-profile", parentId],
@@ -507,7 +543,56 @@ function ParentMatchesPage() {
 
         {/* SECTION 3: My Interviews */}
         <section>
-          <h2 className="text-lg font-bold text-gray-900 mb-4">My Interviews</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900">My Interviews</h2>
+            <Button
+              size="sm"
+              onClick={() => setShowInterviewForm((v) => !v)}
+              className="bg-[#00B4D8] hover:bg-[#0096B4] text-white gap-1.5"
+            >
+              {showInterviewForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {showInterviewForm ? "Cancel" : "Request interview"}
+            </Button>
+          </div>
+
+          {showInterviewForm && (
+            <div className="bg-white rounded-xl border border-[#00B4D8]/30 shadow-sm p-5 mb-4 space-y-4">
+              <p className="text-sm font-semibold text-gray-800">New interview request</p>
+              <div className="space-y-1.5">
+                <Label>Babysitter name</Label>
+                <Input
+                  value={newBabysitterName}
+                  onChange={e => setNewBabysitterName(e.target.value)}
+                  placeholder="Name of the babysitter"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Preferred date & time</Label>
+                <Input
+                  type="datetime-local"
+                  value={newPreferredDate}
+                  onChange={e => setNewPreferredDate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Notes</Label>
+                <Textarea
+                  value={newNotes}
+                  onChange={e => setNewNotes(e.target.value)}
+                  placeholder="Any preferences or questions for the team…"
+                  rows={3}
+                />
+              </div>
+              <Button
+                onClick={requestInterview}
+                disabled={addingInterview || !newBabysitterName.trim()}
+                className="w-full bg-[#00B4D8] hover:bg-[#0096B4] text-white"
+              >
+                {addingInterview ? "Sending…" : "Send request"}
+              </Button>
+            </div>
+          )}
+
           {interviewsLoading ? (
             <div className="space-y-3">{[1, 2].map((i) => <Skeleton key={i} className="h-16 w-full rounded-xl" />)}</div>
           ) : !interviews || interviews.length === 0 ? (
