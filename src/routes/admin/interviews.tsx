@@ -105,7 +105,7 @@ function InterviewRow({ interview }: { interview: any }) {
           </div>
         ) : (
           <button onClick={() => !isCancelled && setEditingDate(true)} className={`text-xs text-left ${!isCancelled ? "hover:underline" : ""}`}>
-            {interview.scheduledAt ? fmtDateTime(interview.scheduledAt) : <span className="text-gray-400 italic">Set date…</span>}
+            {interview.scheduledAt ? fmtDateTime(interview.scheduledAt, "en-GB") : <span className="text-gray-400 italic">Set date…</span>}
           </button>
         )}
       </TableCell>
