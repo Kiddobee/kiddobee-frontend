@@ -56,7 +56,7 @@ function BabysitterDashboard() {
         .from("Interview")
         .select("*")
         .eq("babysitter_id", sitterId!)
-        .neq("status", "cancelled")
+        .neq("status", "Cancelled")
         .order("scheduledAt", { ascending: true });
       return data ?? [];
     },

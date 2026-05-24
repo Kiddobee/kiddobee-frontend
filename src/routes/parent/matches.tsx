@@ -87,7 +87,7 @@ function SlotPicker({ sitterId, excludeId, onBook }: { sitterId: string; exclude
         .from("Interview")
         .select("scheduledAt")
         .eq("babysitter_id", sitterId)
-        .neq("status", "cancelled")
+        .neq("status", "Cancelled")
         .gte("scheduledAt", `${date}T00:00:00.000Z`)
         .lte("scheduledAt", `${date}T23:59:59.999Z`);
       if (excludeId) q = q.neq("id", excludeId);
@@ -165,7 +165,7 @@ function MatchCard({ match, parentId, rank }: { match: Match; parentId: string; 
         parent_id: parentId,
         babysitter_id: match.sitter_id,
         babysitter_name: match.sitter_name,
-        status: "scheduled",
+        status: "Scheduled",
         scheduledAt,
         created_at: new Date().toISOString(),
       });
@@ -374,7 +374,7 @@ function InterviewCard({ interview, parentId }: { interview: any; parentId: stri
 
   async function cancelInterview() {
     setCancelling(true);
-    const { error } = await supabase.from("Interview").update({ status: "cancelled" }).eq("id", interview.id);
+    const { error } = await supabase.from("Interview").update({ status: "Cancelled" }).eq("id", interview.id);
     setCancelling(false);
     if (error) { toast.error("Failed to cancel"); return; }
     toast.success("Interview cancelled");
@@ -383,7 +383,7 @@ function InterviewCard({ interview, parentId }: { interview: any; parentId: stri
 
   async function reschedule(h: number, newDate: string) {
     const scheduledAt = new Date(`${newDate}T${String(h).padStart(2, "0")}:00:00`).toISOString();
-    const { error } = await supabase.from("Interview").update({ scheduledAt, status: "scheduled" }).eq("id", interview.id);
+    const { error } = await supabase.from("Interview").update({ scheduledAt, status: "Scheduled" }).eq("id", interview.id);
     if (error) { toast.error("Failed to reschedule"); return; }
     toast.success("Interview rescheduled!");
     setShowEdit(false);
