@@ -83,7 +83,7 @@ function InterviewRow({ interview }: { interview: any }) {
   return (
     <TableRow className={isCancelled ? "opacity-50" : ""}>
       <TableCell className="font-medium">{interview.babysitter_name ?? "—"}</TableCell>
-      <TableCell>{interview.parent_id ?? "—"}</TableCell>
+      <TableCell>{interview.parentName ?? interview.parent_id ?? "—"}</TableCell>
 
       {/* Scheduled date — click to edit */}
       <TableCell>
@@ -168,8 +168,17 @@ function InterviewsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["interviews"],
     queryFn: async () => {
-      const { data } = await supabase.from("Interview").select("*").order("scheduledAt", { ascending: false });
-      return data ?? [];
+      const { data: interviews } = await supabase.from("Interview").select("*").order("scheduledAt", { ascending: false });
+      if (!interviews || interviews.length === 0) return [];
+      const parentIds = [...new Set(interviews.map((i: any) => i.parent_id).filter(Boolean))];
+      const { data: parents } = await supabase
+        .from("Parent")
+        .select('"Parent ID", "First Name", "Last Name"')
+        .in('"Parent ID"', parentIds);
+      const nameMap: Record<string, string> = Object.fromEntries(
+        (parents ?? []).map((p: any) => [p["Parent ID"], [p["First Name"], p["Last Name"]].filter(Boolean).join(" ") || p["Parent ID"]])
+      );
+      return interviews.map((i: any) => ({ ...i, parentName: nameMap[i.parent_id] ?? i.parent_id ?? "—" }));
     },
   });
 
