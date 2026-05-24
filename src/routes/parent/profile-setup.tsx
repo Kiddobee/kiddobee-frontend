@@ -101,6 +101,8 @@ function ParentProfileSetup() {
   const [parentId, setParentId] = useState<string | null>(null);
 
   // Step 1 — Basic info
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [location, setLocation] = useState("");
   const [arrondissement, setArrondissement] = useState("");
   const [postalCode, setPostalCode] = useState("");
@@ -161,6 +163,8 @@ function ParentProfileSetup() {
       const { data: p } = await supabase.from("Parent").select("*").eq("Parent ID", pid).single();
       if (!p) { setDataLoading(false); return; }
 
+      setFirstName(p["First Name"] ?? "");
+      setLastName(p["Last Name"] ?? "");
       setLocation(p["Location (Arrondissement / City)"] ?? "");
       setArrondissement(p["Location (Arrondissement / City)"] ?? "");
       setPostalCode(p["Arrondissement / Postal Code"] ?? "");
@@ -215,6 +219,8 @@ function ParentProfileSetup() {
 
   async function saveStep1() {
     await save({
+      "First Name": firstName,
+      "Last Name": lastName,
       "Location (Arrondissement / City)": location,
       "Arrondissement / Postal Code": postalCode,
       "Phone Number": phone,
@@ -379,6 +385,16 @@ function ParentProfileSetup() {
             {step === 1 && (
               <>
                 <h2 className="text-base font-semibold text-gray-900">Basic information</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label>First name</Label>
+                    <Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Marie" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Last name</Label>
+                    <Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Dupont" />
+                  </div>
+                </div>
                 <div className="space-y-1.5">
                   <Label>Nearest Metro / RER station</Label>
                   <StationCombobox value={location} onChange={setLocation} />
@@ -590,6 +606,8 @@ function ParentProfileSetup() {
                 <h2 className="text-base font-semibold text-gray-900">Summary</h2>
                 <div className="space-y-2 text-sm">
                   {([
+                    ["First name", firstName || "—"],
+                    ["Last name", lastName || "—"],
                     ["Location", location || "—"],
                     ["Postal code", postalCode || "—"],
                     ["Phone", phone || "—"],

@@ -440,6 +440,18 @@ function ParentMatchesPage() {
       )}
 
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-10">
+        {/* Welcome */}
+        {parent && (parent["First Name"] || parent["Last Name"]) && (
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Welcome, {[parent["First Name"], parent["Last Name"]].filter(Boolean).join(" ")}
+            </h1>
+            {profileComplete && (
+              <p className="text-gray-500 mt-1 text-sm">Here are your recommended babysitters.</p>
+            )}
+          </div>
+        )}
+
         {/* SECTION 1: Matches */}
         <section>
           <h2 className="text-lg font-bold text-gray-900 mb-4">Your Matches</h2>
