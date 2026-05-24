@@ -60,6 +60,11 @@ function statusColor(status: string): string {
   return "bg-gray-100 text-gray-600 border-gray-200";
 }
 
+function capStatus(s: string): string {
+  if (!s || s === "—") return s;
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
 const SLOT_HOURS = Array.from({ length: 12 }, (_, i) => i + 8); // 08:00 – 20:00
 
 const NEXT_7_DAYS = Array.from({ length: 7 }, (_, i) => {
@@ -87,7 +92,7 @@ function SlotPicker({ sitterId, excludeId, onBook }: { sitterId: string; exclude
         .from("Interview")
         .select("scheduledAt")
         .eq("babysitter_id", sitterId)
-        .neq("status", "Cancelled")
+        .not("status", "ilike", "cancelled")
         .gte("scheduledAt", `${date}T00:00:00.000Z`)
         .lte("scheduledAt", `${date}T23:59:59.999Z`);
       if (excludeId) q = q.neq("id", excludeId);
@@ -142,7 +147,6 @@ function SlotPicker({ sitterId, excludeId, onBook }: { sitterId: string; exclude
 function MatchCard({ match, parentId, rank }: { match: Match; parentId: string; rank: number }) {
   const [expanded, setExpanded] = useState(false);
   const [showSlotPicker, setShowSlotPicker] = useState(false);
-  const [scheduled, setScheduled] = useState(false);
   const qc = useQueryClient();
 
   const top3 = [...SCORE_DIMS]
@@ -158,6 +162,21 @@ function MatchCard({ match, parentId, rank }: { match: Match; parentId: string; 
     enabled: expanded,
   });
 
+  const { data: existingInterview } = useQuery({
+    queryKey: ["existing-interview", parentId, match.sitter_id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("Interview")
+        .select("id, scheduledAt")
+        .eq("parent_id", parentId)
+        .eq("babysitter_id", match.sitter_id)
+        .not("status", "ilike", "cancelled")
+        .limit(1);
+      return data?.[0] ?? null;
+    },
+    enabled: Boolean(parentId),
+  });
+
   async function bookSlot(h: number, date: string) {
     const scheduledAt = new Date(`${date}T${String(h).padStart(2, "0")}:00:00`).toISOString();
     try {
@@ -170,10 +189,10 @@ function MatchCard({ match, parentId, rank }: { match: Match; parentId: string; 
         created_at: new Date().toISOString(),
       });
       if (error) throw error;
-      setScheduled(true);
       setShowSlotPicker(false);
       toast.success("Interview scheduled!");
       qc.invalidateQueries({ queryKey: ["parent-interviews", parentId] });
+      qc.invalidateQueries({ queryKey: ["existing-interview", parentId, match.sitter_id] });
     } catch (err: any) {
       toast.error("Failed to schedule: " + err.message);
     }
@@ -284,9 +303,9 @@ function MatchCard({ match, parentId, rank }: { match: Match; parentId: string; 
                   </div>
                 </div>
               )}
-              {scheduled ? (
+              {existingInterview ? (
                 <div className="w-full text-center py-2 text-sm font-medium text-green-600 bg-green-50 rounded-lg">
-                  Interview scheduled ✓
+                  Interview already scheduled ✓
                 </div>
               ) : (
                 <>
@@ -336,7 +355,7 @@ function BookingCard({ contract }: { contract: any }) {
           </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Badge variant="outline" className={`text-xs ${statusColor(status)}`}>{status}</Badge>
+          <Badge variant="outline" className={`text-xs ${statusColor(status)}`}>{capStatus(status)}</Badge>
           {expanded ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
         </div>
       </button>
@@ -378,6 +397,7 @@ function InterviewCard({ interview, parentId }: { interview: any; parentId: stri
     setCancelling(false);
     if (error) { toast.error("Failed to cancel"); return; }
     toast.success("Interview cancelled");
+    qc.invalidateQueries({ queryKey: ["existing-interview", parentId, interview.babysitter_id] });
     refresh();
   }
 
@@ -406,7 +426,7 @@ function InterviewCard({ interview, parentId }: { interview: any; parentId: stri
           </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Badge variant="outline" className={`text-xs ${statusColor(status)}`}>{status}</Badge>
+          <Badge variant="outline" className={`text-xs ${statusColor(status)}`}>{capStatus(status)}</Badge>
           {expanded ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
         </div>
       </button>
@@ -489,7 +509,12 @@ function ParentMatchesPage() {
   const { data: interviews, isLoading: interviewsLoading } = useQuery({
     queryKey: ["parent-interviews", parentId],
     queryFn: async () => {
-      const { data } = await supabase.from("Interview").select("*").eq("parent_id", parentId!).order("created_at", { ascending: false });
+      const { data } = await supabase
+        .from("Interview")
+        .select("*")
+        .eq("parent_id", parentId!)
+        .not("status", "ilike", "cancelled")
+        .order("created_at", { ascending: false });
       return data ?? [];
     },
     enabled: Boolean(parentId),
